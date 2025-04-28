@@ -3,8 +3,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Speed Test in Progress"
-    Height="250"
-    Width="400"
+    Height="300"
+    Width="450"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterScreen"
     Background="#141526"
@@ -20,6 +20,24 @@
                 From="0" To="360" Duration="0:0:1.5"
                 RepeatBehavior="Forever" />
         </Storyboard>
+
+        <!-- Стилі для індикаторів етапів -->
+        <Style x:Key="StepIndicator" TargetType="Ellipse">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Fill" Value="#333444"/>
+            <Setter Property="Stroke" Value="#0077FF"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="ActiveStepIndicator" TargetType="Ellipse" BasedOn="{StaticResource StepIndicator}">
+            <Setter Property="Fill" Value="#0077FF"/>
+        </Style>
+
+        <Style x:Key="CompletedStepIndicator" TargetType="Ellipse" BasedOn="{StaticResource StepIndicator}">
+            <Setter Property="Fill" Value="#22CC88"/>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="25">
@@ -27,31 +45,36 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Заголовок -->
         <TextBlock Grid.Row="0" 
                    Text="Running Speed Test" 
-                   FontSize="20" 
+                   FontSize="22" 
                    FontWeight="SemiBold" 
                    HorizontalAlignment="Center"
                    Margin="0,0,0,20"/>
 
-        <!-- Центральна кнопка "GO" в стилі Speedtest.net -->
+        <!-- Центральна кнопка "GO" -->
         <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Ellipse Width="120" Height="120" Fill="#222333" />
+            <!-- Фонове коло -->
+            <Ellipse Width="140" Height="140" Fill="#222333" />
+
+            <!-- Зовнішнє кільце (нерухоме) -->
+            <Ellipse Width="140" Height="140" Stroke="#333444" StrokeThickness="2" StrokeDashArray="2,2" />
 
             <!-- Індикатор прогресу навколо кнопки -->
-            <Path x:Name="ProgressRing" Stroke="#0077FF" StrokeThickness="4" Width="120" Height="120">
+            <Path x:Name="ProgressRing" Stroke="#0077FF" StrokeThickness="4" Width="140" Height="140" StrokeEndLineCap="Round">
                 <Path.Data>
                     <PathGeometry>
                         <PathGeometry.Figures>
                             <PathFigureCollection>
-                                <PathFigure StartPoint="60,10">
+                                <PathFigure StartPoint="70,10">
                                     <PathFigure.Segments>
                                         <PathSegmentCollection>
-                                            <ArcSegment Size="50,50" IsLargeArc="True" 
-                                                       SweepDirection="Clockwise" Point="60,110" />
+                                            <ArcSegment Size="60,60" IsLargeArc="True" 
+                                                       SweepDirection="Clockwise" Point="70,130" />
                                         </PathSegmentCollection>
                                     </PathFigure.Segments>
                                 </PathFigure>
@@ -60,32 +83,86 @@
                     </PathGeometry>
                 </Path.Data>
                 <Path.RenderTransform>
-                    <RotateTransform x:Name="SpinnerRotation" CenterX="60" CenterY="60" />
+                    <RotateTransform x:Name="SpinnerRotation" CenterX="70" CenterY="70" />
                 </Path.RenderTransform>
             </Path>
 
+            <!-- Внутрішнє коло -->
+            <Ellipse Width="100" Height="100">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#333444" Offset="0"/>
+                        <GradientStop Color="#222333" Offset="1"/>
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+
             <!-- Текст "GO" всередині кнопки -->
             <TextBlock Text="GO" 
-                       FontSize="24" 
-                       FontWeight="SemiBold" 
+                       FontSize="28" 
+                       FontWeight="Bold" 
+                       Foreground="#FFFFFF"
                        HorizontalAlignment="Center" 
-                       VerticalAlignment="Center"/>
+                       VerticalAlignment="Center">
+                <TextBlock.Effect>
+                    <DropShadowEffect ShadowDepth="1" Direction="320" Color="#0077FF" Opacity="0.6" BlurRadius="6"/>
+                </TextBlock.Effect>
+            </TextBlock>
+
+            <!-- Поточна швидкість -->
+            <TextBlock x:Name="CurrentSpeedText"
+                       Text=""
+                       FontSize="12"
+                       Foreground="#FFFFFF"
+                       Opacity="0.9"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Bottom"
+                       Margin="0,0,0,20"/>
         </Grid>
 
-        <!-- Статус тесту -->
-        <StackPanel Grid.Row="2" Margin="0,20,0,0">
-            <TextBlock x:Name="StatusText"
+        <!-- Індикатори етапів тесту -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,15">
+            <Ellipse x:Name="Step1Indicator" Style="{StaticResource ActiveStepIndicator}"/>
+            <Ellipse x:Name="Step2Indicator" Style="{StaticResource StepIndicator}"/>
+            <Ellipse x:Name="Step3Indicator" Style="{StaticResource StepIndicator}"/>
+            <Ellipse x:Name="Step4Indicator" Style="{StaticResource StepIndicator}"/>
+        </StackPanel>
+
+        <!-- Статус тесту і прогрес -->
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Статус тесту -->
+            <TextBlock Grid.Row="0" 
+                       x:Name="StatusText"
                        Text="Connecting to server..."
                        HorizontalAlignment="Center"
-                       FontSize="14"
-                       Opacity="0.9"/>
+                       FontSize="15"
+                       FontWeight="SemiBold"
+                       Foreground="#FFFFFF"/>
 
-            <TextBlock x:Name="ServerNameText"
+            <!-- Детальна інформація -->
+            <TextBlock Grid.Row="1" 
+                       x:Name="DetailText"
+                       Text="Finding optimal test server..."
+                       HorizontalAlignment="Center"
+                       FontSize="13"
+                       Opacity="0.8"
+                       Margin="0,5,0,0"/>
+
+            <!-- Інформація про сервер -->
+            <TextBlock Grid.Row="2"
+                       x:Name="ServerNameText"
                        Text=""
                        HorizontalAlignment="Center"
                        FontSize="12"
-                       Opacity="0.7"
-                       Margin="0,8,0,0"/>
-        </StackPanel>
+                       Foreground="#0077FF"
+                       Opacity="0.9"
+                       Margin="0,6,0,0"/>
+        </Grid>
     </Grid>
 </Window>
