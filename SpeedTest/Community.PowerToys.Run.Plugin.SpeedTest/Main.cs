@@ -167,7 +167,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 
             try
             {
-                loadingWindow.UpdateStatus("Пошук найкращого сервера...");
+                loadingWindow.UpdateStatus("Searching for the best server...");
 
                 var psi = new ProcessStartInfo
                 {
@@ -183,15 +183,15 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 // Затримка для імітації початку тесту
                 await Task.Delay(1000);
 
-                loadingWindow.UpdateStatus("Перевірка латентності...");
+                loadingWindow.UpdateStatus("Testing latency...");
                 await Task.Delay(1500);
 
-                loadingWindow.UpdateStatus("Тестування швидкості завантаження...");
+                loadingWindow.UpdateStatus("Testing download speed...");
                 // Тут можна додати якийсь спосіб дізнатися про обраний сервер, якщо доступно
-                loadingWindow.UpdateServerInfo("UARNET, Львів");
+                loadingWindow.UpdateServerInfo("NET, Current Server");
                 await Task.Delay(3000);
 
-                loadingWindow.UpdateStatus("Тестування швидкості вивантаження...");
+                loadingWindow.UpdateStatus("Testing upload speed...");
                 await Task.Delay(3000);
 
                 // Зчитуємо результати
