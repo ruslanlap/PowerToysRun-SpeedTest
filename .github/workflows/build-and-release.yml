@@ -68,6 +68,16 @@ jobs:
           # Create SpeedTest subfolder
           New-Item -ItemType Directory -Force -Path "$artifactDir/SpeedTest"
           
+          # Copy Images folder (icons) to artifact directory to ensure correct icons in release
+          $imagesSrc = "SpeedTest/Community.PowerToys.Run.Plugin.SpeedTest/Images"
+          $imagesDst = "$artifactDir/SpeedTest/Images"
+          if (Test-Path $imagesSrc) {
+            Write-Host "Copying Images folder from $imagesSrc to $imagesDst"
+            Copy-Item -Path $imagesSrc -Destination $imagesDst -Recurse -Force
+          } else {
+            Write-Host "Images folder not found at $imagesSrc"
+          }
+          
           # Define the direct path to the build output
           $buildOutput = "SpeedTest/Community.PowerToys.Run.Plugin.SpeedTest/bin/${{ matrix.platform }}/Release"
           
@@ -171,6 +181,12 @@ jobs:
           echo "Listing release artifacts:"
           ls -la release-artifacts
       
+      - name: Rename release artifacts for convention
+        run: |
+          VERSION="0.90.1"
+          mv release-artifacts/SpeedTest-x64.zip release-artifacts/SpeedTest-${VERSION}-x64.zip
+          mv release-artifacts/SpeedTest-ARM64.zip release-artifacts/SpeedTest-${VERSION}-ARM64.zip
+      
       - name: Get version from tag
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
@@ -216,8 +232,8 @@ jobs:
       - name: Generate SHA256 checksums
         run: |
           cd release-artifacts
-          sha256sum SpeedTest-x64.zip > SpeedTest-x64.zip.sha256
-          sha256sum SpeedTest-ARM64.zip > SpeedTest-ARM64.zip.sha256
+          sha256sum SpeedTest-0.90.1-x64.zip > SpeedTest-0.90.1-x64.zip.sha256
+          sha256sum SpeedTest-0.90.1-ARM64.zip > SpeedTest-0.90.1-ARM64.zip.sha256
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -227,9 +243,9 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            release-artifacts/SpeedTest-x64.zip
-            release-artifacts/SpeedTest-ARM64.zip
-            release-artifacts/SpeedTest-x64.zip.sha256
-            release-artifacts/SpeedTest-ARM64.zip.sha256
+            release-artifacts/SpeedTest-0.90.1-x64.zip
+            release-artifacts/SpeedTest-0.90.1-ARM64.zip
+            release-artifacts/SpeedTest-0.90.1-x64.zip.sha256
+            release-artifacts/SpeedTest-0.90.1-ARM64.zip.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

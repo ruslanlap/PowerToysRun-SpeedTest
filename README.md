@@ -51,6 +51,16 @@
 
 ---
 
+## ⚡ Quick Start
+
+1. Install PowerToys (if not already installed)
+2. Download the SpeedTest plugin (x64 or ARM64)
+3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
+4. Restart PowerToys
+5. Press `Alt+Space`, type `speedtest`, and hit Enter!
+
+---
+
 ## 📋 Table of Contents
 - [📝 Overview](#-overview)
 - [✨ Features](#-features)
@@ -65,6 +75,12 @@
 - [☕ Support](#-support)
 - [📄 License](#-license)
 - [🙏 Acknowledgements](#-acknowledgements)
+- [🛠️ Troubleshooting](#-troubleshooting)
+- [🔒 Security & Privacy](#-security--privacy)
+- [🧑‍💻 Tech Stack](#-tech-stack)
+- [📝 Changelog](#-changelog)
+- [🌐 Localization](#-localization)
+- [📸 Screenshots](#-screenshots)
 
 ---
 
@@ -130,14 +146,7 @@ SpeedTest/
 ```
 
 ## 🤝 Contributing
-Contributions are welcome! Here's how you can help:
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-Please make sure to update tests as appropriate.
+Contributions are welcome! Please read our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
 
 ### Contributors
 - [ruslanlap](https://github.com/ruslanlap) - Project creator and maintainer
@@ -172,6 +181,64 @@ MIT License. See [LICENSE](LICENSE).
 - [Microsoft PowerToys](https://github.com/microsoft/PowerToys) team
 - [Ookla Speedtest CLI](https://www.speedtest.net/apps/cli)
 - All contributors and users!
+
+---
+
+## 🛠️ Troubleshooting
+
+- **Plugin does not appear in PowerToys Run**  
+  Make sure you extracted the plugin to the correct folder and restarted PowerToys.
+- **Icons do not update**  
+  Try deleting the old plugin folder before copying the new version.
+- **Speed test does not run**  
+  Ensure you have an active internet connection and permission to run speedtest.exe.
+
+---
+
+## 🔒 Security & Privacy
+
+- The plugin does not store your test history.
+- All tests are performed locally using the official speedtest CLI.
+- No third-party APIs or data collection.
+
+---
+
+## 🧑‍💻 Tech Stack
+
+- C# / .NET 9.0
+- WPF (UI)
+- PowerToys Run API
+- GitHub Actions (CI/CD)
+
+---
+
+## 📝 Changelog
+
+See the [Releases](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases) page for the latest changes and updates.
+
+---
+
+## 🌐 Localization
+
+Currently, the plugin UI is in English. Localization support is planned for future releases.
+
+---
+
+## 📸 Screenshots
+<div align="center">
+  <figure>
+    <img src="SpeedTest/data/demo1.png" width="350" alt="Demo: Running Speed Test">
+    <figcaption>Running Speed Test</figcaption>
+  </figure>
+  <figure>
+    <img src="SpeedTest/data/demo2.png" width="350" alt="Demo: Results Window">
+    <figcaption>Results Window</figcaption>
+  </figure>
+  <figure>
+    <img src="SpeedTest/data/demo3.png" width="350" alt="Demo: Copy/Share Results">
+    <figcaption>Copy/Share Results</figcaption>
+  </figure>
+</div>
 
 ---
 
