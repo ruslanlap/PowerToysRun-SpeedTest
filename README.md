@@ -2,43 +2,62 @@
 
 <div align="center">
   <img src="SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="800">
-  <br>
-  <img src="SpeedTest/data/logo.png" alt="SpeedTest Icon" width="128" height="128">
-  <h1>⏱️ SpeedTest for PowerToys Run</h1>
+  <p align="center">
+    <img src="SpeedTest/data/logo.png" alt="SpeedTest Icon" width="128" height="128">
+  </p>
+  <h1>⚡ SpeedTest for PowerToys Run ⚡</h1>
   <h3>Run internet speed tests directly from PowerToys Run</h3>
-  <br>
+
+  <!-- Badges -->
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest">
     <img src="https://img.shields.io/github/v/release/ruslanlap/PowerToysRun-SpeedTest?style=for-the-badge" alt="Latest Release">
   </a>
   <img src="https://img.shields.io/badge/PowerToys-Compatible-blue" alt="PowerToys Compatible">
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platform">
-  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+  </a>
   <img src="https://img.shields.io/maintenance/yes/2025" alt="Maintenance">
   <img src="https://img.shields.io/badge/C%23-.NET-512BD4" alt="C# .NET">
-  <img src="https://img.shields.io/badge/version-v0.90.0-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-v0.90.1-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
-  <img src="https://img.shields.io/github/stars/ruslanlap/PowerToysRun-SpeedTest?style=social" alt="GitHub stars">
-  <img src="https://img.shields.io/github/issues/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub issues">
-  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/total" alt="GitHub all releases">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/stargazers">
+    <img src="https://img.shields.io/github/stars/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/issues">
+    <img src="https://img.shields.io/github/issues/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub issues">
+  </a>
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest">
+    <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/total" alt="GitHub all releases">
+  </a>
   <img src="https://img.shields.io/badge/Made%20with-❤️-red" alt="Made with Love">
   <img src="https://img.shields.io/badge/Awesome-Yes-orange" alt="Awesome">
+</div>
+
+<div align="center">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest/download/SpeedTest-x64.zip">
+    <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-x64-blue?style=for-the-badge&logo=github" alt="Download x64">
+  </a>
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest/download/SpeedTest-ARM64.zip">
+    <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-ARM64-blue?style=for-the-badge&logo=github" alt="Download ARM64">
+  </a>
 </div>
 
 ---
 
 ## 📋 Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Demo](#demo)
-- [Easy Install](#easy-install)
-- [Usage](#usage)
-- [Data Folder](#data-folder)
-- [Building from Source](#building-from-source)
-- [Project Structure](#project-structure)
-- [Implementation Details](#implementation-details)
-- [FAQ](#faq)
-- [License](#license)
-- [Acknowledgements](#acknowledgements)
+- [📝 Overview](#-overview)
+- [✨ Features](#-features)
+- [🎬 Demo](#-demo)
+- [⚡ Easy Install](#-easy-install)
+- [🚀 Usage](#-usage)
+- [📁 Data Folder](#-data-folder)
+- [🛠️ Building from Source](#️-building-from-source)
+- [📊 Project Structure](#-project-structure)
+- [🤝 Contributing](#-contributing)
+- [❓ FAQ](#-faq)
+- [📄 License](#-license)
+- [🙏 Acknowledgements](#-acknowledgements)
 
 ---
 
@@ -48,7 +67,7 @@
 
 - **Plugin ID:** `5A0F7ED1D3F24B0A900732839D0E43DB`
 - **Action Keyword:** `speedtest`
-- **Platform:** Windows 10/11 (x64)
+- **Platform:** Windows 10/11 (x64, ARM64)
 - **Tech:** C#/.NET, WPF, PowerToys Run API
 
 ## ✨ Features
@@ -61,7 +80,6 @@
 - 🧪 Automated tests and CI/CD (GitHub Actions)
 
 ## 🎬 Demo
-
 <div align="center">
   <img src="SpeedTest/data/demo1.png" width="350" alt="Demo 1">
   <img src="SpeedTest/data/demo2.png" width="350" alt="Demo 2">
@@ -69,10 +87,11 @@
 </div>
 
 ## ⚡ Easy Install
-1. [Download the latest release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest)
-2. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
-3. Restart PowerToys
-4. Press `Alt+Space`, type `speedtest`, and hit Enter!
+1. [Download the latest release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest/download/SpeedTest-x64.zip)
+2. [Download the latest release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest/download/SpeedTest-ARM64.zip)
+3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
+4. Restart PowerToys
+5. Press `Alt+Space`, type `speedtest`, and hit Enter!
 
 ## 🚀 Usage
 - Open PowerToys Run (`Alt+Space`)
@@ -90,8 +109,8 @@ Feel free to use these assets in your own documentation or to customize the plug
 ## 🛠️ Building from Source
 - Requires .NET 6+ SDK and Windows 10/11
 - Clone the repo and open `Templates.sln` in Visual Studio
-- Build the `SpeedTest` project (x64)
-- Output: `SpeedTest-x64.zip` in the root directory
+- Build the `SpeedTest` project (x64 or ARM64)
+- Output: `SpeedTest-x64.zip` or `SpeedTest-ARM64.zip` in the root directory
 
 ## 📊 Project Structure
 ```
@@ -103,13 +122,18 @@ SpeedTest/
 ├── ...
 ```
 
-## 🛠️ Implementation Details
-- Core logic in `Main.cs`, implements `IPlugin`, `IPluginI18n`, `IDisposable`
-- Uses bundled `speedtest.exe` (Ookla CLI) for actual speed testing
-- Parses CLI output (latency, download/upload, server, etc.) in real-time
-- Results shown in custom WPF windows (`LoadingWindow`, `ResultsWindow`)
-- Supports async UI, theme adaptation, robust error handling
-- Dependencies: ManagedCommon, System.Text.Json, System.Text.RegularExpressions, Wox.Plugin
+## 🤝 Contributing
+Contributions are welcome! Here's how you can help:
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+Please make sure to update tests as appropriate.
+
+### Contributors
+- [ruslanlap](https://github.com/ruslanlap) - Project creator and maintainer
 
 ## ❓ FAQ
 <details>
