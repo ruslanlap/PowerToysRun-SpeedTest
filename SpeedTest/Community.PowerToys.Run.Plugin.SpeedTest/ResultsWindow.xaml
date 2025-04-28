@@ -2,94 +2,343 @@
     x:Class="Community.PowerToys.Run.Plugin.SpeedTest.ResultsWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Community.PowerToys.Run.Plugin.SpeedTest"
+    mc:Ignorable="d"
     Title="Speed Test Results"
-    Height="300"
-    Width="400"
+    Height="500"
+    Width="550"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterOwner"
-    Background="White"
-    FontFamily="Segoe UI">
+    Background="#141526"
+    Foreground="White"
+    FontFamily="Segoe UI"
+    AllowsTransparency="True"
+    WindowStyle="None"
+    BorderThickness="0">
 
-  <Grid Margin="16">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>  <!-- Download -->
-      <RowDefinition Height="Auto"/>  <!-- Upload -->
-      <RowDefinition Height="Auto"/>  <!-- Ping -->
-      <RowDefinition Height="Auto"/>  <!-- Server -->
-      <RowDefinition Height="Auto"/>  <!-- URL -->
-      <RowDefinition Height="*"/>     <!-- Spacer -->
-      <RowDefinition Height="Auto"/>  <!-- Button -->
-    </Grid.RowDefinitions>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="*"/>
-    </Grid.ColumnDefinitions>
+    <Window.Resources>
+        <!-- Color scheme -->
+        <SolidColorBrush x:Key="DownloadBrush" Color="#00B37A" />
+        <SolidColorBrush x:Key="UploadBrush" Color="#3BAAF7" />
+        <SolidColorBrush x:Key="PingBrush" Color="#FF9800" />
+        <SolidColorBrush x:Key="BackgroundDarkBrush" Color="#141526" />
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#1E1F30" />
+        <SolidColorBrush x:Key="ButtonBlueBrush" Color="#3BAAF7" />
+        <SolidColorBrush x:Key="ButtonHoverBrush" Color="#2D8DD9" />
+        <SolidColorBrush x:Key="HeaderBrush" Color="#FFFFFF" />
 
-    <!-- Download -->
-    <TextBlock
-      Grid.Row="0" Grid.Column="0"
-      Text="Download:" FontWeight="Bold"
-      VerticalAlignment="Center"/>
-    <TextBlock
-      Grid.Row="0" Grid.Column="1"
-      Margin="8,2,0,2"
-      Text="{Binding Download.MbpsSpeed, StringFormat={}{0:F2} Mbps}"/>
+        <!-- Result card style with shadow effect -->
+        <Style x:Key="ResultCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Margin" Value="6" />
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="2" BlurRadius="10" Opacity="0.3" Color="#000000"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-    <!-- Upload -->
-    <TextBlock
-      Grid.Row="1" Grid.Column="0"
-      Text="Upload:" FontWeight="Bold"
-      VerticalAlignment="Center"/>
-    <TextBlock
-      Grid.Row="1" Grid.Column="1"
-      Margin="8,2,0,2"
-      Text="{Binding Upload.MbpsSpeed, StringFormat={}{0:F2} Mbps}"/>
+        <!-- Speed value style -->
+        <Style x:Key="SpeedValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="46" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,0,0" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1" BlurRadius="2" Opacity="0.5" Color="#000000"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-    <!-- Ping -->
-    <TextBlock
-      Grid.Row="2" Grid.Column="0"
-      Text="Ping:" FontWeight="Bold"
-      VerticalAlignment="Center"/>
-    <TextBlock
-      Grid.Row="2" Grid.Column="1"
-      Margin="8,2,0,2"
-      Text="{Binding Ping.Latency, StringFormat={}{0:F2} ms}"/>
+        <!-- Speed label style -->
+        <Style x:Key="SpeedLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Opacity" Value="0.8" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,6,0,10" />
+        </Style>
 
-    <!-- Server -->
-    <TextBlock
-      Grid.Row="3" Grid.Column="0"
-      Text="Server:" FontWeight="Bold"
-      VerticalAlignment="Center"/>
-    <TextBlock
-      Grid.Row="3" Grid.Column="1"
-      Margin="8,2,0,2"
-      Text="{Binding Server.Name}"/>
+        <!-- Progress bar style -->
+        <Style x:Key="SpeedMeterStyle" TargetType="ProgressBar">
+            <Setter Property="Height" Value="6" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="#333444" />
+            <Setter Property="Margin" Value="0,8,0,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid x:Name="Root">
+                            <Border 
+                                CornerRadius="3"
+                                Background="{TemplateBinding Background}"/>
+                            <Border 
+                                x:Name="PART_Indicator" 
+                                CornerRadius="3"
+                                Background="{TemplateBinding Foreground}" 
+                                HorizontalAlignment="Left"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-    <!-- URL -->
-    <TextBlock
-      Grid.Row="4" Grid.Column="0"
-      Text="URL:" FontWeight="Bold"
-      VerticalAlignment="Top"/>
-    <TextBlock
-      Grid.Row="4" Grid.Column="1"
-      Margin="8,2,0,2">
-      <Hyperlink
-        NavigateUri="{Binding Result.Url}"
-        RequestNavigate="Hyperlink_RequestNavigate">
-        <TextBlock
-          Text="{Binding Result.Url}"
-          TextTrimming="CharacterEllipsis"/>
-      </Hyperlink>
-    </TextBlock>
+        <!-- Button style -->
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource ButtonBlueBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="18,10" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource ButtonHoverBrush}" />
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.3" Color="#000000"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.9" />
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
-    <!-- OK Button -->
-    <Button
-      Grid.Row="6" Grid.ColumnSpan="2"
-      Content="OK"
-      Width="80" Height="28"
-      HorizontalAlignment="Right"
-      Margin="0,16,0,0"
-      Click="Ok_Click"/>
-  </Grid>
+        <!-- Icon style -->
+        <Style x:Key="IconStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.5" Color="#000000"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Server info style -->
+        <Style x:Key="ServerInfoStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="#E0E0E0" />
+            <Setter Property="Margin" Value="0,4,0,4" />
+        </Style>
+
+        <!-- Close button style -->
+        <Style x:Key="CloseButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="12">
+                            <Path Data="M 0,0 L 10,10 M 0,10 L 10,0" 
+                                  Stroke="White" 
+                                  StrokeThickness="1.5"
+                                  Margin="7"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF4F4F" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="16" Background="{StaticResource BackgroundDarkBrush}">
+        <Grid Margin="25">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" /> <!-- Header -->
+                <RowDefinition Height="Auto" /> <!-- Speed cards -->
+                <RowDefinition Height="Auto" /> <!-- Server info -->
+                <RowDefinition Height="*" />     <!-- Free space -->
+                <RowDefinition Height="Auto" /> <!-- Buttons -->
+            </Grid.RowDefinitions>
+
+            <!-- Header with close button -->
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="Internet Speed Test Results" 
+                           FontSize="22" 
+                           FontWeight="SemiBold" 
+                           Foreground="{StaticResource HeaderBrush}"/>
+                <Button Style="{StaticResource CloseButtonStyle}"
+                        HorizontalAlignment="Right"
+                        Click="Ok_Click" />
+            </Grid>
+
+            <!-- Speed cards section -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Download Card -->
+                <Border Grid.Column="0" Style="{StaticResource ResultCardStyle}">
+                    <StackPanel>
+                        <!-- Download icon with glowing effect -->
+                        <TextBlock Text="↓" 
+                                   Style="{StaticResource IconStyle}" 
+                                   Foreground="{StaticResource DownloadBrush}">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#00B37A" ShadowDepth="0" BlurRadius="15" Opacity="0.7"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+
+                        <!-- Speed value -->
+                        <TextBlock Style="{StaticResource SpeedValueStyle}" 
+                                   Foreground="{StaticResource DownloadBrush}"
+                                   Text="{Binding Download.MbpsSpeed, StringFormat={}{0:F1}, Mode=OneWay}" />
+
+                        <!-- Speed label -->
+                        <TextBlock Style="{StaticResource SpeedLabelStyle}" 
+                                   Text="Download Mbps" />
+
+                        <!-- Speed meter -->
+                        <ProgressBar Style="{StaticResource SpeedMeterStyle}" 
+                                     Foreground="{StaticResource DownloadBrush}"
+                                     Maximum="300"
+                                     Value="{Binding Download.MbpsSpeed, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Upload Card -->
+                <Border Grid.Column="1" Style="{StaticResource ResultCardStyle}">
+                    <StackPanel>
+                        <!-- Upload icon with glowing effect -->
+                        <TextBlock Text="↑" 
+                                   Style="{StaticResource IconStyle}" 
+                                   Foreground="{StaticResource UploadBrush}">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#3BAAF7" ShadowDepth="0" BlurRadius="15" Opacity="0.7"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+
+                        <!-- Speed value -->
+                        <TextBlock Style="{StaticResource SpeedValueStyle}" 
+                                   Foreground="{StaticResource UploadBrush}"
+                                   Text="{Binding Upload.MbpsSpeed, StringFormat={}{0:F1}, Mode=OneWay}" />
+
+                        <!-- Speed label -->
+                        <TextBlock Style="{StaticResource SpeedLabelStyle}" 
+                                   Text="Upload Mbps" />
+
+                        <!-- Speed meter -->
+                        <ProgressBar Style="{StaticResource SpeedMeterStyle}" 
+                                     Foreground="{StaticResource UploadBrush}"
+                                     Maximum="300"
+                                     Value="{Binding Upload.MbpsSpeed, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Ping Card -->
+                <Border Grid.Column="2" Style="{StaticResource ResultCardStyle}">
+                    <StackPanel>
+                        <!-- Ping icon with glowing effect -->
+                        <TextBlock Text="⟳" 
+                                   Style="{StaticResource IconStyle}" 
+                                   Foreground="{StaticResource PingBrush}">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#FF9800" ShadowDepth="0" BlurRadius="15" Opacity="0.7"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+
+                        <!-- Ping value -->
+                        <TextBlock Style="{StaticResource SpeedValueStyle}" 
+                                   Foreground="{StaticResource PingBrush}"
+                                   Text="{Binding Ping.Latency, StringFormat={}{0:F0}, Mode=OneWay}" />
+
+                        <!-- Ping label -->
+                        <TextBlock Style="{StaticResource SpeedLabelStyle}" 
+                                   Text="Ping ms" />
+
+                        <!-- Ping meter -->
+                        <ProgressBar Style="{StaticResource SpeedMeterStyle}" 
+                                     Foreground="{StaticResource PingBrush}"
+                                     Maximum="100"
+                                     Value="{Binding Ping.Latency, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Server information -->
+            <Border Grid.Row="2" Style="{StaticResource ResultCardStyle}" Margin="6,20,6,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource ServerInfoStyle}">
+                        <Run Text="Server: " FontWeight="Medium" Foreground="White" />
+                        <Run Text="{Binding Server.Name, Mode=OneWay}" />
+                        <Run Text=" - " />
+                        <Run Text="{Binding Server.Location, Mode=OneWay}" />
+                        <Run Text=", " />
+                        <Run Text="{Binding Server.Country, Mode=OneWay}" />
+                    </TextBlock>
+
+                    <TextBlock Style="{StaticResource ServerInfoStyle}" Margin="0,10,0,0">
+                        <Run Text="Results: " FontWeight="Medium" Foreground="White" />
+                        <Hyperlink NavigateUri="{Binding Result.Url, Mode=OneWay}" 
+                                  RequestNavigate="Hyperlink_RequestNavigate"
+                                  Foreground="#3BAAF7">
+                            <TextBlock Text="{Binding Result.Url, Mode=OneWay}" 
+                                      TextTrimming="CharacterEllipsis" 
+                                      Foreground="#3BAAF7"/>
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- Action buttons -->
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Copy Results" 
+                        Margin="0,0,12,0"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Click="CopyResults_Click">
+                    <Button.Effect>
+                        <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.3" Color="#000000"/>
+                    </Button.Effect>
+                </Button>
+
+                <Button Content="Close" 
+                        Style="{StaticResource ActionButtonStyle}"
+                        Background="#666680"
+                        Click="Ok_Click">
+                    <Button.Effect>
+                        <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.3" Color="#000000"/>
+                    </Button.Effect>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>

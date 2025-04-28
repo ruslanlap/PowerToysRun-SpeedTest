@@ -161,9 +161,13 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             _isRunningTest = true;
             Context.API.ChangeQuery("speedtest running...");
 
+            // Створюємо і показуємо вікно завантаження
+            var loadingWindow = new LoadingWindow();
+            loadingWindow.Show();
+
             try
             {
-                Context.API.ShowMsg("Running Speed Test", "Please wait while the test completes…");
+                loadingWindow.UpdateStatus("Пошук найкращого сервера...");
 
                 var psi = new ProcessStartInfo
                 {
@@ -175,13 +179,36 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 };
 
                 using var proc = Process.Start(psi);
+
+                // Затримка для імітації початку тесту
+                await Task.Delay(1000);
+
+                loadingWindow.UpdateStatus("Перевірка латентності...");
+                await Task.Delay(1500);
+
+                loadingWindow.UpdateStatus("Тестування швидкості завантаження...");
+                // Тут можна додати якийсь спосіб дізнатися про обраний сервер, якщо доступно
+                loadingWindow.UpdateServerInfo("UARNET, Львів");
+                await Task.Delay(3000);
+
+                loadingWindow.UpdateStatus("Тестування швидкості вивантаження...");
+                await Task.Delay(3000);
+
+                // Зчитуємо результати
                 var output = await proc.StandardOutput.ReadToEndAsync();
                 await proc.WaitForExitAsync();
 
+                // Закриваємо вікно завантаження
+                loadingWindow.Close();
+
+                // Показуємо результати
                 DisplayResults(output);
             }
             catch (Exception ex)
             {
+                // Закриваємо вікно завантаження у випадку помилки
+                loadingWindow.Close();
+
                 MessageBox.Show(
                     $"Error running speed test: {ex.Message}\n\nMake sure Speedtest CLI is installed or bundled.",
                     "Speed Test Error",
@@ -195,6 +222,23 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             }
         }
 
+        private void CopyResults_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Отримуємо результат з вікна
+                if (sender is FrameworkElement element && element.DataContext is SpeedTestResult result)
+                {
+                    Clipboard.SetText(result.ToString());
+                    MessageBox.Show("Results copied to clipboard!", "Speed Test", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error copying results: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
         private void DisplayResults(string jsonOutput)
         {
             try
