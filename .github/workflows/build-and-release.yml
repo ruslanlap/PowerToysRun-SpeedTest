@@ -179,37 +179,31 @@ jobs:
         id: release_notes
         run: |
           cat > release_notes.md << 'EOL'
-          # Weather Plugin v${{ steps.get_version.outputs.VERSION }}
-          
-          ![SpeedTest Plugin Logo](https://raw.githubusercontent.com/ruslanlap/PowerToysRun-SpeedTest/master/SpeedTest/data/logo.png)
-          
-          ## ✨ What's New
-          
-          This release brings you the power of internet speed testing directly to your PowerToys Run interface!
-          
-          ### 🚀 Highlights
-          
-          - ⚡ **One-command internet speed test** - Run tests instantly from PowerToys Run
-          - 📊 **Download, upload, ping, server info** - All results at a glance
-          - 🖼️ **Modern WPF UI** - Real-time progress and beautiful results
-          - 🎨 **Theme-aware** - Adapts to dark/light Windows themes
-          - 📝 **Copy/share results** - Instantly share your speed test results
-          - 🛠️ **Robust error handling**
-          
-          ## 📥 Installation
-          
-          1. Download the ZIP file for your platform (x64 or ARM64)
-          2. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
-          3. Restart PowerToys
-          4. Start using with `Alt+Space` then type `speedtest`
-          
-          ## 🐛 Found a bug?
-          
-          If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/ruslanlap/PowerToysRun-SpeedTest/issues).
-          
-          Made with ❤️ by [ruslanlap](https://github.com/ruslanlap)
+          # SpeedTest Plugin v0.90.1
+
+          <img src="https://raw.githubusercontent.com/ruslanlap/PowerToysRun-SpeedTest/master/SpeedTest/data/logo.png" alt="SpeedTest Logo" width="32" height="32" />
+
+          ![Demo](https://raw.githubusercontent.com/ruslanlap/PowerToysRun-SpeedTest/master/SpeedTest/data/demo-speedtest(1).gif)
+
+          ## What is SpeedTest Plugin?
+
+          SpeedTest Plugin lets you run internet speed tests directly from PowerToys Run (Alt+Space) on Windows. Just type `speedtest` and instantly see your download/upload speeds, ping, and server info—no browser or external app needed.
+
+          ### Key Features
+          - Real-time speed test results (download, upload, ping)
+          - Uses official Ookla CLI for accuracy
+          - Modern, theme-adaptive UI (dark/light)
+          - Copy/share results easily
+          - No persistent storage—privacy-friendly
+          - Easy install: just extract and use!
+
+          ## What's New in v0.90.1
+          - Initial public release
+          - Fast, accurate speed tests
+          - Beautiful WPF UI
+          - One-click copy/share
+
           EOL
-          
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
           cat release_notes.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -217,7 +211,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          name: Weather Plugin v${{ steps.get_version.outputs.VERSION }}
+          name: SpeedTest Plugin v0.90.1
           body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
           draft: false
           prerelease: false
