@@ -142,4 +142,3 @@ MIT License. See [LICENSE](LICENSE).
 <div align="center">
   <sub>Made with ❤️ by <a href="https://github.com/ruslanlap">ruslanlap</a></sub>
 </div>
-# PowerToysRun-SpeedTest

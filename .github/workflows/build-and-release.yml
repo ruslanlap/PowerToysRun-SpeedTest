@@ -1,4 +1,4 @@
-name: Build and Release Pomodoro Plugin
+name: Build and Release SpeedTest Plugin
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
           dotnet-version: '9.0.x'
       
       - name: Build
-        run: dotnet build Pomodoro/Pomodoro.sln -c Release -p:Platform="${{ matrix.platform }}"
+        run: dotnet build SpeedTest/SpeedTest.sln -c Release -p:Platform="${{ matrix.platform }}"
       
       - name: Get version
         id: get_version
@@ -52,7 +52,7 @@ jobs:
       
       - name: Debug Output
         run: |
-          Get-ChildItem -Path "Pomodoro" -Recurse -Directory | Where-Object { $_.Name -eq "Release" } | ForEach-Object { Write-Host $_.FullName }
+          Get-ChildItem -Path "SpeedTest" -Recurse -Directory | Where-Object { $_.Name -eq "Release" } | ForEach-Object { Write-Host $_.FullName }
         shell: pwsh
       
       - name: Create output directory
@@ -60,23 +60,23 @@ jobs:
       
       - name: Copy build output to artifacts directory
         run: |
-          $artifactDir = "artifacts/Pomodoro-v${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}"
+          $artifactDir = "artifacts/SpeedTest-v${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}"
           
           # Create the artifact directory
           New-Item -ItemType Directory -Force -Path $artifactDir
           
-          # Create Pomodoro subfolder
-          New-Item -ItemType Directory -Force -Path "$artifactDir/Pomodoro"
+          # Create SpeedTest subfolder
+          New-Item -ItemType Directory -Force -Path "$artifactDir/SpeedTest"
           
           # Define the direct path to the build output
-          $buildOutput = "Pomodoro/Community.PowerToys.Run.Plugin.Pomodoro/bin/${{ matrix.platform }}/Release"
+          $buildOutput = "SpeedTest/Community.PowerToys.Run.Plugin.SpeedTest/bin/${{ matrix.platform }}/Release"
           
           Write-Host "Using build output directory: $buildOutput"
           
           # Check if the directory exists
           if (-not (Test-Path $buildOutput)) {
             Write-Host "Build output directory not found at expected path. Searching for it..."
-            $buildOutput = Get-ChildItem -Path "Pomodoro" -Recurse -Directory | 
+            $buildOutput = Get-ChildItem -Path "SpeedTest" -Recurse -Directory | 
                            Where-Object { $_.Name -eq "Release" -and $_.FullName -like "*${{ matrix.platform }}*" } | 
                            Select-Object -First 1 -ExpandProperty FullName
             
@@ -98,7 +98,7 @@ jobs:
           $files = Get-ChildItem -Path $buildOutput -File
           if ($files.Count -gt 0) {
             Write-Host "Found $($files.Count) files in build output directory. Copying directly..."
-            Copy-Item -Path "$buildOutput/*" -Destination "$artifactDir/Pomodoro" -Recurse -Force
+            Copy-Item -Path "$buildOutput/*" -Destination "$artifactDir/SpeedTest" -Recurse -Force
             Write-Host "Files copied successfully"
           } else {
             # Look for a .NET runtime folder
@@ -108,7 +108,7 @@ jobs:
             
             if ($runtimeFolder) {
               Write-Host "Found runtime folder: $runtimeFolder"
-              Copy-Item -Path "$runtimeFolder/*" -Destination "$artifactDir/Pomodoro" -Recurse -Force
+              Copy-Item -Path "$runtimeFolder/*" -Destination "$artifactDir/SpeedTest" -Recurse -Force
               Write-Host "Files copied successfully from runtime folder"
             } else {
               # If no runtime folder, check for any subdirectories
@@ -116,7 +116,7 @@ jobs:
               if ($subDirs.Count -gt 0) {
                 $firstSubDir = $subDirs[0].FullName
                 Write-Host "No runtime folder found, but found subdirectory: $firstSubDir"
-                Copy-Item -Path "$firstSubDir/*" -Destination "$artifactDir/Pomodoro" -Recurse -Force
+                Copy-Item -Path "$firstSubDir/*" -Destination "$artifactDir/SpeedTest" -Recurse -Force
                 Write-Host "Files copied from first subdirectory"
               } else {
                 Write-Error "No files or subdirectories found in build output directory"
@@ -128,17 +128,8 @@ jobs:
       
       - name: Create ZIP archive
         run: |
-          $artifactDir = "artifacts/Pomodoro-v${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}"
-          
-          # Create the zip files with names that match the README.md download links
-          if ("${{ matrix.platform }}" -eq "x64") {
-            $zipFile = "Pomodoro-x64.zip"
-          } else {
-            $zipFile = "Pomodoro-ARM64.zip"
-          }
-          
-          # Create the zip file
-          Compress-Archive -Path "$artifactDir/Pomodoro" -DestinationPath "artifacts/$zipFile"
+          $artifactDir = "artifacts/SpeedTest-v${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}"
+          Compress-Archive -Path "$artifactDir/SpeedTest/*" -DestinationPath "$artifactDir.zip"
         shell: pwsh
       
       - name: Upload build artifacts
@@ -175,8 +166,8 @@ jobs:
       - name: Prepare artifacts for release
         run: |
           mkdir -p release-artifacts
-          cp downloaded-artifacts/build-artifacts-x64/*.zip release-artifacts/Pomodoro-x64.zip || echo "Failed to copy x64 artifact"
-          cp downloaded-artifacts/build-artifacts-arm64/*.zip release-artifacts/Pomodoro-ARM64.zip || echo "Failed to copy ARM64 artifact"
+          cp downloaded-artifacts/build-artifacts-x64/*.zip release-artifacts/SpeedTest-x64.zip || echo "Failed to copy x64 artifact"
+          cp downloaded-artifacts/build-artifacts-arm64/*.zip release-artifacts/SpeedTest-ARM64.zip || echo "Failed to copy ARM64 artifact"
           echo "Listing release artifacts:"
           ls -la release-artifacts
       
@@ -188,34 +179,33 @@ jobs:
         id: release_notes
         run: |
           cat > release_notes.md << 'EOL'
-          # 🍅 Pomodoro Plugin v${{ steps.get_version.outputs.VERSION }}
+          # Weather Plugin v${{ steps.get_version.outputs.VERSION }}
           
-          ![Pomodoro Plugin Logo](https://raw.githubusercontent.com/ruslanlap/PowerToysRun-Pomodoro/master/Assets/logo.png)
+          ![SpeedTest Plugin Logo](https://raw.githubusercontent.com/ruslanlap/PowerToysRun-SpeedTest/master/SpeedTest/data/logo.png)
           
           ## ✨ What's New
           
-          This release brings you the power of the Pomodoro Technique directly to your PowerToys Run interface!
+          This release brings you the power of internet speed testing directly to your PowerToys Run interface!
           
           ### 🚀 Highlights
           
-          - ⏱️ **Start, Pause, and Reset Pomodoro Sessions** - Manage your work sessions with simple commands
-          - 🍅 **Visual Countdown** - See time remaining in your current session
-          - 🔔 **End-of-Session Alerts** - Get notified when your session ends with sound or visual cues
-          - 📊 **Session Tracking** - Keep track of completed Pomodoro sessions
-          - 🌙 **Break Management** - Automatically switch between work sessions and breaks
-          - ⚙️ **Configurable Session Length** - Customize work and break durations to fit your workflow
-          - 🔁 **Daily Productivity History** - View your productivity patterns over time
+          - ⚡ **One-command internet speed test** - Run tests instantly from PowerToys Run
+          - 📊 **Download, upload, ping, server info** - All results at a glance
+          - 🖼️ **Modern WPF UI** - Real-time progress and beautiful results
+          - 🎨 **Theme-aware** - Adapts to dark/light Windows themes
+          - 📝 **Copy/share results** - Instantly share your speed test results
+          - 🛠️ **Robust error handling**
           
           ## 📥 Installation
           
           1. Download the ZIP file for your platform (x64 or ARM64)
           2. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
           3. Restart PowerToys
-          4. Start using with `Alt+Space` then type `pomodoro`
+          4. Start using with `Alt+Space` then type `speedtest`
           
           ## 🐛 Found a bug?
           
-          If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/ruslanlap/PowerToysRun-Pomodoro/issues).
+          If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/ruslanlap/PowerToysRun-SpeedTest/issues).
           
           Made with ❤️ by [ruslanlap](https://github.com/ruslanlap)
           EOL
@@ -227,12 +217,12 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          name: Pomodoro Plugin v${{ steps.get_version.outputs.VERSION }}
+          name: Weather Plugin v${{ steps.get_version.outputs.VERSION }}
           body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
           draft: false
           prerelease: false
           files: |
-            release-artifacts/Pomodoro-x64.zip
-            release-artifacts/Pomodoro-ARM64.zip
+            release-artifacts/SpeedTest-x64.zip
+            release-artifacts/SpeedTest-ARM64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
