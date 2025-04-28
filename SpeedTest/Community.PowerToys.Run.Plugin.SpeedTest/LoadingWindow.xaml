@@ -3,8 +3,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Speed Test in Progress"
-    Height="300"
-    Width="450"
+    Height="480"
+    Width="480"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterScreen"
     Background="#141526"
@@ -43,8 +43,9 @@
     <Grid Margin="25">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -54,10 +55,10 @@
                    FontSize="22" 
                    FontWeight="SemiBold" 
                    HorizontalAlignment="Center"
-                   Margin="0,0,0,20"/>
+                   Margin="0,0,0,15"/>
 
         <!-- Центральна кнопка "GO" -->
-        <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,10">
             <!-- Фонове коло -->
             <Ellipse Width="140" Height="140" Fill="#222333" />
 
@@ -121,15 +122,32 @@
         </Grid>
 
         <!-- Індикатори етапів тесту -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,15">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,10">
             <Ellipse x:Name="Step1Indicator" Style="{StaticResource ActiveStepIndicator}"/>
             <Ellipse x:Name="Step2Indicator" Style="{StaticResource StepIndicator}"/>
             <Ellipse x:Name="Step3Indicator" Style="{StaticResource StepIndicator}"/>
             <Ellipse x:Name="Step4Indicator" Style="{StaticResource StepIndicator}"/>
         </StackPanel>
 
+        <!-- CLI Output in its own row with increased height -->
+        <Border Grid.Row="3" 
+                BorderBrush="#333444" 
+                BorderThickness="1" 
+                CornerRadius="4" 
+                Margin="0,5,0,10" 
+                Background="#1A1B2A">
+            <ScrollViewer Height="140" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="8">
+                <TextBlock x:Name="CLIOutputText"
+                           TextWrapping="NoWrap"
+                           Opacity="0.9"
+                           Foreground="#22CC88"
+                           FontFamily="Consolas"
+                           FontSize="12"/>
+            </ScrollViewer>
+        </Border>
+
         <!-- Статус тесту і прогрес -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>

@@ -115,6 +115,15 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             }
         }
 
+        // Add this method to LoadingWindow.xaml.cs
+        public void UpdateCLIOutput(string output)
+        {
+            if (CLIOutputText != null)
+            {
+                CLIOutputText.Text = output;
+            }
+        }
+
         private void ResetIndicators()
         {
             // Встановлюємо всі індикатори в стандартний стиль

@@ -82,26 +82,27 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         private void OnThemeChanged(Theme _, Theme newTheme) =>
             UpdateIconPath(newTheme);
 
-        private async void RunSpeedTest()
+        private async void RunSpeedTest(string additionalArgs = "")
         {
             if (_isRunningTest) return;
             _isRunningTest = true;
             Context.API.ChangeQuery("speedtest running...");
 
-            // Створюємо і показуємо вікно завантаження
+            // Create and show loading window
             var loadingWindow = new LoadingWindow();
             loadingWindow.Show();
 
             try
             {
-                // Перевіряємо наявність Speedtest CLI
-                string cliExecutable = File.Exists(_cliPath) ? _cliPath : "speedtest";
+                loadingWindow.UpdateStage(LoadingWindow.TestStage.Connecting);
+                loadingWindow.UpdateDetail("Finding optimal test server...");
 
-                // Налаштовуємо процес для запуску Speedtest CLI
+                var cliOutputBuilder = new System.Text.StringBuilder();
+
                 var psi = new ProcessStartInfo
                 {
-                    FileName = cliExecutable,
-                    Arguments = "--format=json --accept-license --accept-gdpr",
+                    FileName = File.Exists(_cliPath) ? _cliPath : "speedtest",
+                    Arguments = $"--format=json --accept-license --accept-gdpr {additionalArgs}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -110,94 +111,133 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 
                 using var proc = Process.Start(psi);
 
-                // Обробка даних з stderr для відстеження прогресу тесту в реальному часі
-                proc.ErrorDataReceived += (sender, e) =>
+                // Create a buffer for collecting the complete JSON result
+                var outputBuilder = new System.Text.StringBuilder();
+
+                // For reading text output in real-time, create a separate process for CLI display
+                var displayPsi = new ProcessStartInfo
+                {
+                    FileName = File.Exists(_cliPath) ? _cliPath : "speedtest",
+                    Arguments = $"--accept-license --accept-gdpr {additionalArgs}",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var displayProc = Process.Start(displayPsi);
+
+                // Regular expressions for parsing output
+                var latencyRegex = new Regex(@"Latency:\s+([\d\.]+)\s+ms", RegexOptions.Compiled);
+                var downloadRegex = new Regex(@"Download:\s+([\d\.]+)\s+Mbps", RegexOptions.Compiled);
+                var uploadRegex = new Regex(@"Upload:\s+([\d\.]+)\s+Mbps", RegexOptions.Compiled);
+                var serverRegex = new Regex(@"Hosted by\s+(.+?)\s*:", RegexOptions.Compiled);
+
+                // Set up event handlers to process output in real-time
+                displayProc.OutputDataReceived += (sender, e) => 
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
-                        loadingWindow.Dispatcher.Invoke(() =>
+                        // Add line to CLI output
+                        cliOutputBuilder.AppendLine(e.Data);
+
+                        Application.Current.Dispatcher.Invoke(() => 
                         {
-                            // Визначення етапу тесту на основі повідомлення
-                            if (e.Data.Contains("Selecting best server") || e.Data.Contains("Finding optimal server"))
+                            // Update CLI output text
+                            loadingWindow.UpdateCLIOutput(cliOutputBuilder.ToString());
+
+                            // Update status with actual CLI output
+                            if (e.Data.Contains("Hosted by"))
                             {
-                                loadingWindow.UpdateStage(LoadingWindow.TestStage.Connecting);
-                                loadingWindow.UpdateDetail(e.Data);
-                            }
-                            else if (e.Data.Contains("Hosted by"))
-                            {
-                                // Витягаємо інформацію про сервер за допомогою регулярного виразу
-                                var serverMatch = Regex.Match(e.Data, @"Hosted by (.+?) \[.+?\].+?: (\d+\.\d+) ms");
-                                if (serverMatch.Success)
+                                var match = serverRegex.Match(e.Data);
+                                if (match.Success)
                                 {
-                                    string serverName = serverMatch.Groups[1].Value;
-                                    string ping = serverMatch.Groups[2].Value;
-                                    loadingWindow.UpdateServerInfo($"{serverName} [{ping} ms]");
+                                    var serverName = match.Groups[1].Value.Trim();
+                                    loadingWindow.UpdateServerInfo(serverName);
                                 }
                                 loadingWindow.UpdateStage(LoadingWindow.TestStage.Latency);
-                                loadingWindow.UpdateDetail(e.Data);
+                                loadingWindow.UpdateDetail("Measuring connection latency...");
                             }
-                            else if (e.Data.Contains("Testing download speed"))
+                            else if (e.Data.Contains("Latency:"))
+                            {
+                                var match = latencyRegex.Match(e.Data);
+                                if (match.Success)
+                                {
+                                    loadingWindow.UpdateDetail($"Latency: {match.Groups[1].Value} ms");
+                                }
+                            }
+                            else if (e.Data.Contains("Download:"))
                             {
                                 loadingWindow.UpdateStage(LoadingWindow.TestStage.Download);
-                                loadingWindow.UpdateDetail("Measuring download speed...");
+                                var match = downloadRegex.Match(e.Data);
+                                if (match.Success)
+                                {
+                                    loadingWindow.UpdateDetail("Measuring download speed...");
+                                    loadingWindow.UpdateCurrentSpeed($"{match.Groups[1].Value} Mbps");
+                                }
                             }
-                            else if (e.Data.Contains("Testing upload speed"))
+                            else if (e.Data.Contains("Upload:"))
                             {
                                 loadingWindow.UpdateStage(LoadingWindow.TestStage.Upload);
-                                loadingWindow.UpdateDetail("Measuring upload speed...");
-                            }
-                            else if (e.Data.Contains("Mbps"))
-                            {
-                                // Витягуємо значення швидкості
-                                var speedMatch = Regex.Match(e.Data, @"(\d+\.\d+) Mbps");
-                                if (speedMatch.Success)
+                                var match = uploadRegex.Match(e.Data);
+                                if (match.Success)
                                 {
-                                    loadingWindow.UpdateCurrentSpeed($"{speedMatch.Groups[1].Value} Mbps");
+                                    loadingWindow.UpdateDetail("Measuring upload speed...");
+                                    loadingWindow.UpdateCurrentSpeed($"{match.Groups[1].Value} Mbps");
                                 }
-                                loadingWindow.UpdateDetail(e.Data);
                             }
-                            else
+                            else if (e.Data.Contains("Result"))
                             {
-                                loadingWindow.UpdateDetail(e.Data);
+                                loadingWindow.UpdateStage(LoadingWindow.TestStage.Complete);
+                                loadingWindow.UpdateDetail("Test completed successfully!");
                             }
                         });
                     }
                 };
 
-                // Запускаємо асинхронне читання stderr
-                proc.BeginErrorReadLine();
+                displayProc.ErrorDataReceived += (sender, e) => 
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        cliOutputBuilder.AppendLine($"ERROR: {e.Data}");
 
-                // Читаємо результат (JSON) зі stdout
+                        Application.Current.Dispatcher.Invoke(() => 
+                        {
+                            loadingWindow.UpdateCLIOutput(cliOutputBuilder.ToString());
+                            loadingWindow.UpdateDetail($"Error: {e.Data}");
+                        });
+                    }
+                };
+
+                // Start reading the output asynchronously
+                displayProc.BeginOutputReadLine();
+                displayProc.BeginErrorReadLine();
+
+                // Collect the JSON output from the main process
                 string jsonOutput = await proc.StandardOutput.ReadToEndAsync();
-                await proc.WaitForExitAsync();
+                outputBuilder.Append(jsonOutput);
 
-                // Позначаємо тест як завершений
-                loadingWindow.Dispatcher.Invoke(() =>
+                // Wait for both processes to complete
+                await Task.WhenAll(proc.WaitForExitAsync(), displayProc.WaitForExitAsync());
+
+                // Update final stage
+                Application.Current.Dispatcher.Invoke(() => 
                 {
                     loadingWindow.UpdateStage(LoadingWindow.TestStage.Complete);
-                    loadingWindow.UpdateDetail("Analyzing results...");
                 });
 
-                // Невелика затримка, щоб користувач побачив повідомлення про завершення
+                // Wait a moment to show the completion status
                 await Task.Delay(1000);
 
-                // Закриваємо вікно завантаження
+                // Close the loading window
                 loadingWindow.Close();
 
-                // Відображаємо результати
-                if (!string.IsNullOrEmpty(jsonOutput))
-                {
-                    DisplayResults(jsonOutput);
-                }
-                else
-                {
-                    MessageBox.Show("Unable to get test results. Please try again.", 
-                        "Speed Test Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
+                // Display final results
+                DisplayResults(outputBuilder.ToString());
             }
             catch (Exception ex)
             {
-                // Закриваємо вікно завантаження у випадку помилки
+                // Close the loading window in case of an error
                 loadingWindow.Close();
 
                 MessageBox.Show(
@@ -217,32 +257,60 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         {
             try
             {
-                var result = JsonSerializer.Deserialize<SpeedTestResult>(
-                    jsonOutput,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                // Check if the output is empty or not JSON
+                if (string.IsNullOrWhiteSpace(jsonOutput) || !jsonOutput.TrimStart().StartsWith("{"))
+                {
+                    MessageBox.Show(
+                        "No valid results received from the speed test. The server may be busy or there might be network issues.",
+                        "Speed Test Warning",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Try to parse the JSON data
+                var options = new JsonSerializerOptions { 
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true,
+                    ReadCommentHandling = JsonCommentHandling.Skip
+                };
+
+                var result = JsonSerializer.Deserialize<SpeedTestResult>(jsonOutput, options);
 
                 if (result != null)
                 {
-                    // Формуємо текст і копіюємо його в буфер
+                    // Format results text and copy to clipboard
                     var text = result.ToString();
                     Clipboard.SetText(text);
 
-                    // Показуємо кастомне WPF-вікно
+                    // Display results window
                     var window = new ResultsWindow(result);
                     window.ShowDialog();
                 }
                 else
                 {
-                    throw new InvalidOperationException("Could not parse JSON");
+                    throw new InvalidOperationException("Could not parse JSON data");
                 }
+            }
+            catch (JsonException ex)
+            {
+                MessageBox.Show(
+                    $"Error parsing JSON results: {ex.Message}\n\nRaw output was:\n{(jsonOutput?.Length > 200 ? jsonOutput.Substring(0, 200) + "..." : jsonOutput)}",
+                    "JSON Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error parsing results: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    $"Error processing results: {ex.Message}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
-        public string GetTranslatedPluginTitle()       => Name;
+        public string GetTranslatedPluginTitle() => Name;
         public string GetTranslatedPluginDescription() => Description;
 
         public void Dispose()
