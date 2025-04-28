@@ -1,0 +1,40 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        platform: [x64, ARM64]
+
+    runs-on: windows-latest
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore
+
+    - name: Build templates
+      run: |
+        dotnet build .\src\templates\project\ /p:Platform=${{matrix.platform}}
+        dotnet build .\src\templates\solution\ /p:Platform=${{matrix.platform}}
+
+    - name: Test templates
+      if: ${{matrix.platform == 'x64'}}
+      run: dotnet test .\src\templates\solution\ /p:Platform=${{matrix.platform}}

@@ -1,0 +1,95 @@
+<Window
+    x:Class="Community.PowerToys.Run.Plugin.SpeedTest.ResultsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Community.PowerToys.Run.Plugin.SpeedTest"
+    Title="Speed Test Results"
+    Height="300"
+    Width="400"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    Background="White"
+    FontFamily="Segoe UI">
+
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>  <!-- Download -->
+      <RowDefinition Height="Auto"/>  <!-- Upload -->
+      <RowDefinition Height="Auto"/>  <!-- Ping -->
+      <RowDefinition Height="Auto"/>  <!-- Server -->
+      <RowDefinition Height="Auto"/>  <!-- URL -->
+      <RowDefinition Height="*"/>     <!-- Spacer -->
+      <RowDefinition Height="Auto"/>  <!-- Button -->
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <!-- Download -->
+    <TextBlock
+      Grid.Row="0" Grid.Column="0"
+      Text="Download:" FontWeight="Bold"
+      VerticalAlignment="Center"/>
+    <TextBlock
+      Grid.Row="0" Grid.Column="1"
+      Margin="8,2,0,2"
+      Text="{Binding Download.MbpsSpeed, StringFormat={}{0:F2} Mbps}"/>
+
+    <!-- Upload -->
+    <TextBlock
+      Grid.Row="1" Grid.Column="0"
+      Text="Upload:" FontWeight="Bold"
+      VerticalAlignment="Center"/>
+    <TextBlock
+      Grid.Row="1" Grid.Column="1"
+      Margin="8,2,0,2"
+      Text="{Binding Upload.MbpsSpeed, StringFormat={}{0:F2} Mbps}"/>
+
+    <!-- Ping -->
+    <TextBlock
+      Grid.Row="2" Grid.Column="0"
+      Text="Ping:" FontWeight="Bold"
+      VerticalAlignment="Center"/>
+    <TextBlock
+      Grid.Row="2" Grid.Column="1"
+      Margin="8,2,0,2"
+      Text="{Binding Ping.Latency, StringFormat={}{0:F2} ms}"/>
+
+    <!-- Server -->
+    <TextBlock
+      Grid.Row="3" Grid.Column="0"
+      Text="Server:" FontWeight="Bold"
+      VerticalAlignment="Center"/>
+    <TextBlock
+      Grid.Row="3" Grid.Column="1"
+      Margin="8,2,0,2"
+      Text="{Binding Server.Name}"/>
+
+    <!-- URL -->
+    <TextBlock
+      Grid.Row="4" Grid.Column="0"
+      Text="URL:" FontWeight="Bold"
+      VerticalAlignment="Top"/>
+    <TextBlock
+      Grid.Row="4" Grid.Column="1"
+      Margin="8,2,0,2">
+      <Hyperlink
+        NavigateUri="{Binding Result.Url}"
+        RequestNavigate="Hyperlink_RequestNavigate">
+        <TextBlock
+          Text="{Binding Result.Url}"
+          TextTrimming="CharacterEllipsis"/>
+      </Hyperlink>
+    </TextBlock>
+
+    <!-- OK Button -->
+    <Button
+      Grid.Row="6" Grid.ColumnSpan="2"
+      Content="OK"
+      Width="80" Height="28"
+      HorizontalAlignment="Right"
+      Margin="0,16,0,0"
+      Click="Ok_Click"/>
+  </Grid>
+</Window>
