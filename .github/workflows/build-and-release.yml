@@ -1,0 +1,238 @@
+name: Build and Release Pomodoro Plugin
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+
+# Permissions for GITHUB_TOKEN (principle of least privilege)
+permissions:
+  contents: write  # Needed for creating releases
+  issues: read
+  pull-requests: read
+
+# Add restrictions for parallel runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        platform: [x64, arm64]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Build
+        run: dotnet build Pomodoro/Pomodoro.sln -c Release -p:Platform="${{ matrix.platform }}"
+      
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+            echo "IS_TAG=true" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=$(date +'%Y.%m.%d')-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+            echo "IS_TAG=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Debug Output
+        run: |
+          Get-ChildItem -Path "Pomodoro" -Recurse -Directory | Where-Object { $_.Name -eq "Release" } | ForEach-Object { Write-Host $_.FullName }
+        shell: pwsh
+      
+      - name: Create output directory
+        run: mkdir -p artifacts
+      
+      - name: Copy build output to artifacts directory
+        run: |
+          $artifactDir = "artifacts/Pomodoro-v${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}"
+          
+          # Create the artifact directory
+          New-Item -ItemType Directory -Force -Path $artifactDir
+          
+          # Create Pomodoro subfolder
+          New-Item -ItemType Directory -Force -Path "$artifactDir/Pomodoro"
+          
+          # Define the direct path to the build output
+          $buildOutput = "Pomodoro/Community.PowerToys.Run.Plugin.Pomodoro/bin/${{ matrix.platform }}/Release"
+          
+          Write-Host "Using build output directory: $buildOutput"
+          
+          # Check if the directory exists
+          if (-not (Test-Path $buildOutput)) {
+            Write-Host "Build output directory not found at expected path. Searching for it..."
+            $buildOutput = Get-ChildItem -Path "Pomodoro" -Recurse -Directory | 
+                           Where-Object { $_.Name -eq "Release" -and $_.FullName -like "*${{ matrix.platform }}*" } | 
+                           Select-Object -First 1 -ExpandProperty FullName
+            
+            if ($buildOutput) {
+              Write-Host "Found build output directory: $buildOutput"
+            } else {
+              Write-Error "Could not find any Release directory for platform ${{ matrix.platform }}"
+              exit 1
+            }
+          }
+          
+          # Check if build output exists before proceeding
+          if (-not (Test-Path $buildOutput)) {
+            Write-Error "Build output directory not found"
+            exit 1
+          }
+          
+          # Check for files directly in the build output directory
+          $files = Get-ChildItem -Path $buildOutput -File
+          if ($files.Count -gt 0) {
+            Write-Host "Found $($files.Count) files in build output directory. Copying directly..."
+            Copy-Item -Path "$buildOutput/*" -Destination "$artifactDir/Pomodoro" -Recurse -Force
+            Write-Host "Files copied successfully"
+          } else {
+            # Look for a .NET runtime folder
+            $runtimeFolder = Get-ChildItem -Path $buildOutput -Directory | 
+                             Where-Object { $_.Name -like "net*-windows*" } | 
+                             Select-Object -First 1 -ExpandProperty FullName
+            
+            if ($runtimeFolder) {
+              Write-Host "Found runtime folder: $runtimeFolder"
+              Copy-Item -Path "$runtimeFolder/*" -Destination "$artifactDir/Pomodoro" -Recurse -Force
+              Write-Host "Files copied successfully from runtime folder"
+            } else {
+              # If no runtime folder, check for any subdirectories
+              $subDirs = Get-ChildItem -Path $buildOutput -Directory
+              if ($subDirs.Count -gt 0) {
+                $firstSubDir = $subDirs[0].FullName
+                Write-Host "No runtime folder found, but found subdirectory: $firstSubDir"
+                Copy-Item -Path "$firstSubDir/*" -Destination "$artifactDir/Pomodoro" -Recurse -Force
+                Write-Host "Files copied from first subdirectory"
+              } else {
+                Write-Error "No files or subdirectories found in build output directory"
+                exit 1
+              }
+            }
+          }
+        shell: pwsh
+      
+      - name: Create ZIP archive
+        run: |
+          $artifactDir = "artifacts/Pomodoro-v${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}"
+          
+          # Create the zip files with names that match the README.md download links
+          if ("${{ matrix.platform }}" -eq "x64") {
+            $zipFile = "Pomodoro-x64.zip"
+          } else {
+            $zipFile = "Pomodoro-ARM64.zip"
+          }
+          
+          # Create the zip file
+          Compress-Archive -Path "$artifactDir/Pomodoro" -DestinationPath "artifacts/$zipFile"
+        shell: pwsh
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ matrix.platform }}
+          path: artifacts/*.zip
+  
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded-artifacts
+      
+      # Debug step to see what files are available
+      - name: List downloaded artifacts
+        run: |
+          echo "Listing downloaded artifacts directory:"
+          ls -la downloaded-artifacts
+          echo "Listing x64 artifacts:"
+          ls -la downloaded-artifacts/build-artifacts-x64 || echo "No x64 artifacts found"
+          echo "Listing ARM64 artifacts:"
+          ls -la downloaded-artifacts/build-artifacts-arm64 || echo "No ARM64 artifacts found"
+      
+      # Copy artifacts to the expected location with the correct names
+      - name: Prepare artifacts for release
+        run: |
+          mkdir -p release-artifacts
+          cp downloaded-artifacts/build-artifacts-x64/*.zip release-artifacts/Pomodoro-x64.zip || echo "Failed to copy x64 artifact"
+          cp downloaded-artifacts/build-artifacts-arm64/*.zip release-artifacts/Pomodoro-ARM64.zip || echo "Failed to copy ARM64 artifact"
+          echo "Listing release artifacts:"
+          ls -la release-artifacts
+      
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+      - name: Prepare Release Notes
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOL'
+          # 🍅 Pomodoro Plugin v${{ steps.get_version.outputs.VERSION }}
+          
+          ![Pomodoro Plugin Logo](https://raw.githubusercontent.com/ruslanlap/PowerToysRun-Pomodoro/master/Assets/logo.png)
+          
+          ## ✨ What's New
+          
+          This release brings you the power of the Pomodoro Technique directly to your PowerToys Run interface!
+          
+          ### 🚀 Highlights
+          
+          - ⏱️ **Start, Pause, and Reset Pomodoro Sessions** - Manage your work sessions with simple commands
+          - 🍅 **Visual Countdown** - See time remaining in your current session
+          - 🔔 **End-of-Session Alerts** - Get notified when your session ends with sound or visual cues
+          - 📊 **Session Tracking** - Keep track of completed Pomodoro sessions
+          - 🌙 **Break Management** - Automatically switch between work sessions and breaks
+          - ⚙️ **Configurable Session Length** - Customize work and break durations to fit your workflow
+          - 🔁 **Daily Productivity History** - View your productivity patterns over time
+          
+          ## 📥 Installation
+          
+          1. Download the ZIP file for your platform (x64 or ARM64)
+          2. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
+          3. Restart PowerToys
+          4. Start using with `Alt+Space` then type `pomodoro`
+          
+          ## 🐛 Found a bug?
+          
+          If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/ruslanlap/PowerToysRun-Pomodoro/issues).
+          
+          Made with ❤️ by [ruslanlap](https://github.com/ruslanlap)
+          EOL
+          
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Pomodoro Plugin v${{ steps.get_version.outputs.VERSION }}
+          body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+          files: |
+            release-artifacts/Pomodoro-x64.zip
+            release-artifacts/Pomodoro-ARM64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
