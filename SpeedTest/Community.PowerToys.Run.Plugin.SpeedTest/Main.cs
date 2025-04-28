@@ -323,8 +323,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     {
                         PluginName = Name,
                         Title = "Copy result URL",
-                        SubTitle = resultUrl,
-                        IcoPath = IconPath,
                         Action = _ =>
                         {
                             Clipboard.SetDataObject(resultUrl);

@@ -19,7 +19,7 @@
   </a>
   <img src="https://img.shields.io/maintenance/yes/2025" alt="Maintenance">
   <img src="https://img.shields.io/badge/C%23-.NET-512BD4" alt="C# .NET">
-  <img src="https://img.shields.io/badge/version-v0.90.2-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-v0.90.1-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/stargazers">
     <img src="https://img.shields.io/github/stars/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub stars">
@@ -56,6 +56,7 @@
 - [📊 Project Structure](#-project-structure)
 - [🤝 Contributing](#-contributing)
 - [❓ FAQ](#-faq)
+- [☕ Support](#-support)
 - [📄 License](#-license)
 - [🙏 Acknowledgements](#-acknowledgements)
 
@@ -152,6 +153,11 @@ Please make sure to update tests as appropriate.
 <summary><b>Can I choose a specific server?</b></summary>
 <p>Not yet, but server selection support is planned for future releases.</p>
 </details>
+
+## ☕ Support
+Enjoying SpeedTest? ☕ Buy me a coffee to support development:
+
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-☕️-FFDD00?style=for-the-badge&logo=buy-me-a-coffee)](https://ruslanlap.github.io/ruslanlap_buymeacoffe/)
 
 ## 📄 License
 MIT License. See [LICENSE](LICENSE).
