@@ -9,13 +9,11 @@
   <h3>Run internet speed tests directly from PowerToys Run</h3>
 
   <!-- Badges -->
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest">
-    <img src="https://img.shields.io/github/v/release/ruslanlap/PowerToysRun-SpeedTest?style=for-the-badge" alt="Latest Release">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/actions/workflows/build-and-release.yml">
+    <img src="https://github.com/ruslanlap/PowerToysRun-SpeedTest/actions/workflows/build-and-release.yml/badge.svg" alt="Build Status">
   </a>
-  <img src="https://img.shields.io/badge/PowerToys-Compatible-blue" alt="PowerToys Compatible">
-  <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platform">
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest">
+    <img src="https://img.shields.io/github/v/release/ruslanlap/PowerToysRun-SpeedTest?label=latest" alt="Latest Release">
   </a>
   <img src="https://img.shields.io/maintenance/yes/2025" alt="Maintenance">
   <img src="https://img.shields.io/badge/C%23-.NET-512BD4" alt="C# .NET">
@@ -32,6 +30,14 @@
   </a>
   <img src="https://img.shields.io/badge/Made%20with-❤️-red" alt="Made with Love">
   <img src="https://img.shields.io/badge/Awesome-Yes-orange" alt="Awesome">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest">
+    <img src="https://img.shields.io/github/v/release/ruslanlap/PowerToysRun-SpeedTest?style=for-the-badge" alt="Latest Release">
+  </a>
+  <img src="https://img.shields.io/badge/PowerToys-Compatible-blue" alt="PowerToys Compatible">
+  <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platform">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+  </a>
 </div>
 
 <div align="center">
