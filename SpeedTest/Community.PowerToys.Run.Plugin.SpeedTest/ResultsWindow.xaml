@@ -118,10 +118,10 @@
                                Foreground="{StaticResource DownloadBrush}"
                                Margin="0,0,0,8" />
 
-                    <!-- Значення швидкості -->
+                    <!-- Значення швидкості - ВАЖЛИВЕ ВИПРАВЛЕННЯ: тепер використовуємо DisplayDownloadSpeed -->
                     <TextBlock Style="{StaticResource SpeedValueStyle}" 
                                Foreground="{StaticResource DownloadBrush}"
-                               Text="{Binding Download.MbpsSpeed, StringFormat={}{0:F1}, Mode=OneWay}" />
+                               Text="{Binding DisplayDownloadSpeed, StringFormat={}{0:F1}, Mode=OneWay}" />
 
                     <!-- Мітка швидкості -->
                     <TextBlock Style="{StaticResource SpeedLabelStyle}" 
@@ -131,7 +131,7 @@
                     <ProgressBar Style="{StaticResource SpeedMeterStyle}" 
                                  Foreground="{StaticResource DownloadBrush}"
                                  Maximum="300"
-                                 Value="{Binding Download.MbpsSpeed, Mode=OneWay}" />
+                                 Value="{Binding DisplayDownloadSpeed, Mode=OneWay}" />
                 </StackPanel>
             </Border>
 
@@ -145,10 +145,10 @@
                                Foreground="{StaticResource UploadBrush}"
                                Margin="0,0,0,8" />
 
-                    <!-- Значення швидкості -->
+                    <!-- Значення швидкості - ВАЖЛИВЕ ВИПРАВЛЕННЯ: тепер використовуємо DisplayUploadSpeed -->
                     <TextBlock Style="{StaticResource SpeedValueStyle}" 
                                Foreground="{StaticResource UploadBrush}"
-                               Text="{Binding Upload.MbpsSpeed, StringFormat={}{0:F1}, Mode=OneWay}" />
+                               Text="{Binding DisplayUploadSpeed, StringFormat={}{0:F1}, Mode=OneWay}" />
 
                     <!-- Мітка швидкості -->
                     <TextBlock Style="{StaticResource SpeedLabelStyle}" 
@@ -158,7 +158,7 @@
                     <ProgressBar Style="{StaticResource SpeedMeterStyle}" 
                                  Foreground="{StaticResource UploadBrush}"
                                  Maximum="300"
-                                 Value="{Binding Upload.MbpsSpeed, Mode=OneWay}" />
+                                 Value="{Binding DisplayUploadSpeed, Mode=OneWay}" />
                 </StackPanel>
             </Border>
 

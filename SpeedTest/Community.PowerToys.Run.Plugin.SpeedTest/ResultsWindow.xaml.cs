@@ -13,6 +13,18 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         public ResultsWindow(SpeedTestResult result)
         {
             InitializeComponent();
+
+            // Додаткове логування перед встановленням DataContext
+            Debug.WriteLine($"Setting DataContext with result:");
+            Debug.WriteLine($"Using CLI values: {result.UsingCliValues}");
+            Debug.WriteLine($"CLI Download: {result.CliDownloadMbps:F2} Mbps");
+            Debug.WriteLine($"CLI Upload: {result.CliUploadMbps:F2} Mbps");
+            Debug.WriteLine($"Calculated Download: {result.Download?.MbpsSpeed:F2} Mbps");
+            Debug.WriteLine($"Calculated Upload: {result.Upload?.MbpsSpeed:F2} Mbps");
+            Debug.WriteLine($"Display Download: {result.DisplayDownloadSpeed:F2} Mbps");
+            Debug.WriteLine($"Display Upload: {result.DisplayUploadSpeed:F2} Mbps");
+
+            // Встановлюємо DataContext
             DataContext = result;
             _result = result;
 
