@@ -12,7 +12,7 @@ using Wox.Plugin;
 
 namespace Community.PowerToys.Run.Plugin.SpeedTest
 {
-    public class Main : IPlugin, IPluginI18n, IDisposable
+    public class Main : IPlugin, IPluginI18n, IDisposable, IContextMenu
     {
         public static string PluginID => "5A0F7ED1D3F24B0A900732839D0E43DB";
         public string Name => "SpeedTest";
@@ -312,6 +312,29 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 
         public string GetTranslatedPluginTitle() => Name;
         public string GetTranslatedPluginDescription() => Description;
+
+        public System.Collections.Generic.List<ContextMenuResult> LoadContextMenus(Result selectedResult)
+        {
+            if (selectedResult.ContextData is string resultUrl && !string.IsNullOrEmpty(resultUrl))
+            {
+                return new List<ContextMenuResult>
+                {
+                    new ContextMenuResult
+                    {
+                        PluginName = Name,
+                        Title = "Copy result URL",
+                        SubTitle = resultUrl,
+                        IcoPath = IconPath,
+                        Action = _ =>
+                        {
+                            Clipboard.SetDataObject(resultUrl);
+                            return true;
+                        }
+                    }
+                };
+            }
+            return new List<ContextMenuResult>();
+        }
 
         public void Dispose()
         {

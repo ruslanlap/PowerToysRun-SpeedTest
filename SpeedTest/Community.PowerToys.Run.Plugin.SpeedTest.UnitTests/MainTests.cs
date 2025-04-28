@@ -26,9 +26,16 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest.UnitTests
         [TestMethod]
         public void LoadContextMenus_should_return_results()
         {
-            var results = main.LoadContextMenus(new Result { ContextData = "search" });
+            // Create a result with valid context data
+            // In the Main class, LoadContextMenus checks if ContextData is a non-empty string
+            string validUrl = "https://www.speedtest.net/result/12345678";
+            var result = new Result { ContextData = validUrl };
+            
+            var contextMenus = main.LoadContextMenus(result);
 
-            Assert.IsNotNull(results.First());
+            Assert.IsNotNull(contextMenus);
+            Assert.IsTrue(contextMenus.Count > 0);
+            Assert.IsNotNull(contextMenus.First());
         }
     }
 }
