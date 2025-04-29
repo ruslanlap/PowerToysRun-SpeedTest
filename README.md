@@ -86,10 +86,10 @@
 
 ## 📝 Overview
 
-**SpeedTest** is a PowerToys Run plugin that lets you check your internet speed instantly from your keyboard. Just type `speedtest` in PowerToys Run and launch a test—no browser required!
+**SpeedTest** is a PowerToys Run plugin that lets you check your internet speed instantly from your keyboard. Just type `spt` in PowerToys Run and launch a test—no browser required!
 
 - **Plugin ID:** `5A0F7ED1D3F24B0A900732839D0E43DB`
-- **Action Keyword:** `speedtest`
+- **Action Keyword:** `spt` or change to `speedtest`
 - **Platform:** Windows 10/11 (x64, ARM64)
 - **Tech:** C#/.NET, WPF, PowerToys Run API
 
