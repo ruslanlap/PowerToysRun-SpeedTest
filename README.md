@@ -57,7 +57,7 @@
 2. Download the SpeedTest plugin (x64 or ARM64)
 3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 4. Restart PowerToys
-5. Press `Alt+Space`, type `speedtest`, and hit Enter!
+5. Press `Alt+Space`, type `spt`, and hit Enter!
 
 ---
 
