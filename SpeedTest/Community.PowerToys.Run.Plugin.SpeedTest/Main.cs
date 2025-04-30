@@ -218,71 +218,76 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 Result   = new SpeedTestResult.ResultInfo()
             };
 
-            var dRx   = new Regex(@"Download:\s+([\d\.]+)\s+Mbps",
-                                  RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var uRx   = new Regex(@"Upload:\s+([\d\.]+)\s+Mbps",
-                                  RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var pRx   = new Regex(@"Latency:\s+([\d\.]+)\s+ms",
-                                  RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var sRx   = new Regex(@"(?:Hosted by|Server:)\s+(.+?)(?=\s*\(id|\s*:)",
-                                  RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var urlRx = new Regex(
-                @"(?:Result\s*URL|Results|Share\s*results?):\s*(https?://[^\s]+)",
-                RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            // Регулярні вирази з фільтрацією зайвих рядків
+            var dRx = new Regex(@"Download:\s+([\d\.]+)\s+Mbps(?!\s*$$data used)", 
+                              RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var uRx = new Regex(@"Upload:\s+([\d\.]+)\s+Mbps(?!\s*$$data used)", 
+                              RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var pRx = new Regex(@"Latency:\s+([\d\.]+)\s+ms", 
+                              RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var sRx = new Regex(@"(?:Hosted by|Server:)\s+(.+?)(?=\s*\(id|\s*:)",
+                              RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var urlRx = new Regex(@"(?:Result\s*URL|Results|Share\s*results?):\s*(https?://[^\s]+)",
+                              RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-            // **Обов’язково з InvariantCulture для крапки**
-            if (dRx.Match(output) is var dm
-             && dm.Success
-             && double.TryParse(dm.Groups[1].Value,
-                                NumberStyles.Float,
-                                CultureInfo.InvariantCulture,
+            // Отримання останніх значень завантаження
+            var dMatches = dRx.Matches(output);
+            if (dMatches.Count > 0 && 
+                double.TryParse(dMatches[^1].Groups[1].Value, 
+                                NumberStyles.Float, 
+                                CultureInfo.InvariantCulture, 
                                 out var ds))
             {
-                res.CliDownloadMbps    = ds;
+                res.CliDownloadMbps = ds;
                 res.Download.Bandwidth = (long)(ds * 1_000_000 / 8);
             }
 
-            if (uRx.Match(output) is var um
-             && um.Success
-             && double.TryParse(um.Groups[1].Value,
-                                NumberStyles.Float,
-                                CultureInfo.InvariantCulture,
+            // Отримання останніх значень вивантаження
+            var uMatches = uRx.Matches(output);
+            if (uMatches.Count > 0 && 
+                double.TryParse(uMatches[^1].Groups[1].Value, 
+                                NumberStyles.Float, 
+                                CultureInfo.InvariantCulture, 
                                 out var us))
             {
-                res.CliUploadMbps    = us;
+                res.CliUploadMbps = us;
                 res.Upload.Bandwidth = (long)(us * 1_000_000 / 8);
             }
 
-            if (pRx.Match(output) is var pm
-             && pm.Success
-             && double.TryParse(pm.Groups[1].Value,
-                                NumberStyles.Float,
-                                CultureInfo.InvariantCulture,
+            // Отримання останнього значення затримки
+            var pMatches = pRx.Matches(output);
+            if (pMatches.Count > 0 && 
+                double.TryParse(pMatches[^1].Groups[1].Value, 
+                                NumberStyles.Float, 
+                                CultureInfo.InvariantCulture, 
                                 out var ps))
             {
                 res.Ping.Latency = ps;
             }
 
-            if (sRx.Match(output) is var sm && sm.Success)
+            // Отримання інформації про сервер
+            var sMatch = sRx.Match(output);
+            if (sMatch.Success)
             {
-                res.Server.Name = sm.Groups[1].Value.Trim();
+                res.Server.Name = sMatch.Groups[1].Value.Trim();
             }
 
-            var m = urlRx.Match(output);
-            if (m.Success)
+            // Отримання URL результату
+            var urlMatch = urlRx.Match(output);
+            if (urlMatch.Success)
             {
-                res.Result.Url = m.Groups[1].Value.Trim().TrimEnd('.', ',', ')', ']');
+                res.Result.Url = urlMatch.Groups[1].Value.Trim().TrimEnd('.', ',', ')', ']');
             }
             else
             {
-                // fallback — перший https://… 
-                var any = new Regex(@"https?://[^\s]+", RegexOptions.Compiled)
-                          .Match(output);
-                if (any.Success)
-                    res.Result.Url = any.Value.Trim().TrimEnd('.', ',', ')', ']');
+                var fallbackMatch = new Regex(@"https?://[^\s]+", RegexOptions.Compiled)
+                                   .Match(output);
+                if (fallbackMatch.Success)
+                {
+                    res.Result.Url = fallbackMatch.Value.Trim().TrimEnd('.', ',', ')', ']');
+                }
             }
 
-            // Покажемо у ResultsWindow CLI-значення, а не нулі
             res.UsingCliValues = true;
             return res;
         }
