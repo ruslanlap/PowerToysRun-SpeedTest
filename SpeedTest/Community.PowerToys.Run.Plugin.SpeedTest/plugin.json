@@ -1,10 +1,10 @@
 {
   "ID": "5A0F7ED1D3F24B0A900732839D0E43DB",
-  "ActionKeyword": "speedtest",
+  "ActionKeyword": "spt",
   "IsGlobal": false,
   "Name": "SpeedTest",
   "Author": "ruslanlap",
-  "Version": "0.90.0",
+  "Version": "0.90.1",
   "Language": "csharp",
   "Website": "https://github.com/ruslanlap/PowerToysRun-SpeedTest",
   "ExecuteFileName": "Community.PowerToys.Run.Plugin.SpeedTest.dll",
