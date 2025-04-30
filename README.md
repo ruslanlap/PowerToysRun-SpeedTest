@@ -2,6 +2,7 @@
 
 <div align="center">
   <img src="SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="800">
+  <img src="SpeedTest/data/gif presentation.gif" alt="Presentation GIF" width="800">
   <p align="center">
     <img src="SpeedTest/data/logo.png" alt="SpeedTest Icon" width="128" height="128">
   </p>
