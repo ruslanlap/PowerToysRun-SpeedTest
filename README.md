@@ -18,7 +18,7 @@
   </a>
   <img src="https://img.shields.io/maintenance/yes/2025" alt="Maintenance">
   <img src="https://img.shields.io/badge/C%23-.NET-512BD4" alt="C# .NET">
-  <img src="https://img.shields.io/badge/version-v0.90.1-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-v1.0.2-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/stargazers">
     <img src="https://img.shields.io/github/stars/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub stars">
@@ -42,10 +42,10 @@
 </div>
 
 <div align="center">
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v0.90.1/SpeedTest-0.90.1-x64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.2/SpeedTest-1.0.2-x64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-x64-blue?style=for-the-badge&logo=github" alt="Download x64">
   </a>
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v0.90.1/SpeedTest-0.90.1-ARM64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.2/SpeedTest-1.0.2-ARM64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-ARM64-blue?style=for-the-badge&logo=github" alt="Download ARM64">
   </a>
 </div>
@@ -111,8 +111,8 @@
 </div>
 
 ## ⚡ Easy Install
-1. [Download the release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v0.90.1/SpeedTest-0.90.1-x64.zip)
-2. [Download the release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v0.90.1/SpeedTest-0.90.1-ARM64.zip)
+1. [Download the release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.2/SpeedTest-1.0.2-x64.zip)
+2. [Download the release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.2/SpeedTest-1.0.2-ARM64.zip)
 3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 4. Restart PowerToys
 5. Press `Alt+Space`, type `spt`, and hit Enter! (or change to `speedtest` or any other keyword in the settings)
