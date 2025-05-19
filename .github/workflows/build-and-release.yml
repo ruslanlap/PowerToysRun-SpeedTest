@@ -183,7 +183,7 @@ jobs:
       
       - name: Rename release artifacts for convention
         run: |
-          VERSION="0.90.1"
+          VERSION="1.0.2"
           mv release-artifacts/SpeedTest-x64.zip release-artifacts/SpeedTest-${VERSION}-x64.zip
           mv release-artifacts/SpeedTest-ARM64.zip release-artifacts/SpeedTest-${VERSION}-ARM64.zip
       
@@ -195,22 +195,21 @@ jobs:
         id: release_notes
         run: |
           cat > release_notes.md << 'EOL'
-          # SpeedTest Plugin v0.90.1
+          # SpeedTest Plugin v1.0.2
 
           ![SpeedTest Plugin Logo](https://raw.githubusercontent.com/ruslanlap/PowerToysRun-SpeedTest/master/SpeedTest/data/logo.png)
 
           ## What's New
 
-          This release brings you the power of internet speed testing directly to your PowerToys Run interface!
+          This release brings significant UI improvements and refinements to the SpeedTest plugin!
 
           ### Highlights
 
-          - One-command internet speed test - Run tests instantly from PowerToys Run
-          - Download, upload, ping, server info - All results at a glance
-          - Modern WPF UI - Real-time progress and beautiful results
-          - Theme-aware - Adapts to dark/light Windows themes
-          - Copy/share results - Instantly share your speed test results
-          - Robust error handling
+          - Enhanced UI with professional color scheme
+          - Improved animations and transitions
+          - Better visual hierarchy and spacing
+          - Refined typography and status indicators
+          - Bug fixes and performance improvements
 
           ## Installation
 
@@ -223,7 +222,7 @@ jobs:
 
           If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/ruslanlap/PowerToysRun-SpeedTest/issues).
 
-          Made with by [ruslanlap](https://github.com/ruslanlap)
+          Made with ❤️ by [ruslanlap](https://github.com/ruslanlap)
           EOL
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
           cat release_notes.md >> $GITHUB_OUTPUT
@@ -232,20 +231,20 @@ jobs:
       - name: Generate SHA256 checksums
         run: |
           cd release-artifacts
-          sha256sum SpeedTest-0.90.1-x64.zip > SpeedTest-0.90.1-x64.zip.sha256
-          sha256sum SpeedTest-0.90.1-ARM64.zip > SpeedTest-0.90.1-ARM64.zip.sha256
+          sha256sum SpeedTest-1.0.2-x64.zip > SpeedTest-1.0.2-x64.zip.sha256
+          sha256sum SpeedTest-1.0.2-ARM64.zip > SpeedTest-1.0.2-ARM64.zip.sha256
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          name: PowerToysRun-SpeedTest v0.90.1
+          name: PowerToysRun-SpeedTest v1.0.2
           body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
           draft: false
           prerelease: false
           files: |
-            release-artifacts/SpeedTest-0.90.1-x64.zip
-            release-artifacts/SpeedTest-0.90.1-ARM64.zip
-            release-artifacts/SpeedTest-0.90.1-x64.zip.sha256
-            release-artifacts/SpeedTest-0.90.1-ARM64.zip.sha256
+            release-artifacts/SpeedTest-1.0.2-x64.zip
+            release-artifacts/SpeedTest-1.0.2-ARM64.zip
+            release-artifacts/SpeedTest-1.0.2-x64.zip.sha256
+            release-artifacts/SpeedTest-1.0.2-ARM64.zip.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
