@@ -7,49 +7,66 @@
     xmlns:local="clr-namespace:Community.PowerToys.Run.Plugin.SpeedTest"
     mc:Ignorable="d"
     Title="Speed Test Results"
-    Height="450"
-    Width="500"
+    Height="600"
+    Width="800"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterOwner"
-    Background="#141526"
-    Foreground="White"
+    Background="{DynamicResource BackgroundBrush}"
+    Foreground="{DynamicResource TextBrush}"
     FontFamily="Segoe UI">
 
     <Window.Resources>
-        <!-- Колірна схема -->
+        <!-- Dynamic resources -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#141526" />
+        <SolidColorBrush x:Key="CardBrush" Color="#222333" />
+        <SolidColorBrush x:Key="TextBrush" Color="White" />
+        <SolidColorBrush x:Key="HyperlinkBrush" Color="#3BAAF7" />
+
+        <!-- Color scheme -->
         <SolidColorBrush x:Key="DownloadBrush" Color="#00B37A" />
         <SolidColorBrush x:Key="UploadBrush" Color="#3BAAF7" />
         <SolidColorBrush x:Key="PingBrush" Color="#FF9800" />
-        <SolidColorBrush x:Key="BackgroundDarkBrush" Color="#141526" />
-        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#222333" />
+        <SolidColorBrush x:Key="JitterBrush" Color="#FF5722" />
+        <SolidColorBrush x:Key="PacketLossBrush" Color="#E91E63" />
         <SolidColorBrush x:Key="ButtonBlueBrush" Color="#0077FF" />
 
-        <!-- Стиль картки з результатами -->
+        <!-- Result card style -->
         <Style x:Key="ResultCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
+            <Setter Property="Background" Value="{DynamicResource CardBrush}" />
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="Margin" Value="4" />
             <Setter Property="Padding" Value="12" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2A2B3A" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
-        <!-- Стиль значення швидкості -->
+        <!-- Speed value style -->
         <Style x:Key="SpeedValueStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="38" />
             <Setter Property="FontWeight" Value="Light" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,0,0,0" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1" Direction="320" Color="#0077FF" Opacity="0.6" BlurRadius="6"/>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <!-- Стиль мітки швидкості -->
+        <!-- Speed label style -->
         <Style x:Key="SpeedLabelStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="Light" />
             <Setter Property="Opacity" Value="0.7" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,4,0,4" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         </Style>
 
-        <!-- Стиль прогрес-бару -->
+        <!-- Speed meter style - MODIFIED to remove converter dependency -->
         <Style x:Key="SpeedMeterStyle" TargetType="ProgressBar">
             <Setter Property="Height" Value="4" />
             <Setter Property="BorderThickness" Value="0" />
@@ -57,10 +74,10 @@
             <Setter Property="Margin" Value="0,8,0,0" />
         </Style>
 
-        <!-- Стиль кнопок -->
+        <!-- Action button style -->
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource ButtonBlueBrush}" />
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             <Setter Property="Padding" Value="16,8" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -82,25 +99,29 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!-- Конвертер для відображення чисел з комою замість крапки -->
+        <local:DecimalSeparatorConverter x:Key="DecimalSeparatorConverter"/>
     </Window.Resources>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" /> <!-- Заголовок -->
-            <RowDefinition Height="Auto" /> <!-- Швидкість -->
-            <RowDefinition Height="Auto" /> <!-- Інформація про сервер -->
-            <RowDefinition Height="*" />     <!-- Вільний простір -->
-            <RowDefinition Height="Auto" /> <!-- Кнопки -->
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Заголовок -->
+        <!-- Title -->
         <TextBlock Grid.Row="0" 
                    Text="Internet Speed Test Results" 
                    FontSize="20" 
-                   FontWeight="SemiBold" 
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextBrush}"
                    Margin="0,0,0,16"/>
 
-        <!-- Секція швидкості з картками -->
+        <!-- Speed section with cards -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -111,23 +132,25 @@
             <!-- Download Card -->
             <Border Grid.Column="0" Style="{StaticResource ResultCardStyle}">
                 <StackPanel>
-                    <!-- Іконка downlaod -->
                     <TextBlock Text="↓" 
-                               FontSize="24" 
+                               FontSize="16" 
                                HorizontalAlignment="Center" 
                                Foreground="{StaticResource DownloadBrush}"
                                Margin="0,0,0,8" />
 
-                    <!-- Значення швидкості - ВАЖЛИВЕ ВИПРАВЛЕННЯ: тепер використовуємо DisplayDownloadSpeed -->
-                    <TextBlock Style="{StaticResource SpeedValueStyle}" 
-                               Foreground="{StaticResource DownloadBrush}"
-                               Text="{Binding DisplayDownloadSpeed, StringFormat={}{0:F1}, Mode=OneWay}" />
+                    <TextBlock x:Name="DownloadValueText"
+                               Style="{StaticResource SpeedValueStyle}" 
+                               Foreground="{StaticResource DownloadBrush}">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} Mbps">
+                                <Binding Path="DisplayDownloadSpeed" StringFormat="F2" Converter="{StaticResource DecimalSeparatorConverter}"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
 
-                    <!-- Мітка швидкості -->
                     <TextBlock Style="{StaticResource SpeedLabelStyle}" 
-                               Text="Download Mbps" />
+                               Text="Download" />
 
-                    <!-- Індикатор швидкості -->
                     <ProgressBar Style="{StaticResource SpeedMeterStyle}" 
                                  Foreground="{StaticResource DownloadBrush}"
                                  Maximum="300"
@@ -138,23 +161,25 @@
             <!-- Upload Card -->
             <Border Grid.Column="1" Style="{StaticResource ResultCardStyle}">
                 <StackPanel>
-                    <!-- Іконка upload -->
                     <TextBlock Text="↑" 
-                               FontSize="24" 
+                               FontSize="16" 
                                HorizontalAlignment="Center" 
                                Foreground="{StaticResource UploadBrush}"
                                Margin="0,0,0,8" />
 
-                    <!-- Значення швидкості - ВАЖЛИВЕ ВИПРАВЛЕННЯ: тепер використовуємо DisplayUploadSpeed -->
-                    <TextBlock Style="{StaticResource SpeedValueStyle}" 
-                               Foreground="{StaticResource UploadBrush}"
-                               Text="{Binding DisplayUploadSpeed, StringFormat={}{0:F1}, Mode=OneWay}" />
+                    <TextBlock x:Name="UploadValueText"
+                               Style="{StaticResource SpeedValueStyle}" 
+                               Foreground="{StaticResource UploadBrush}">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} Mbps">
+                                <Binding Path="DisplayUploadSpeed" StringFormat="F2" Converter="{StaticResource DecimalSeparatorConverter}"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
 
-                    <!-- Мітка швидкості -->
                     <TextBlock Style="{StaticResource SpeedLabelStyle}" 
-                               Text="Upload Mbps" />
+                               Text="Upload" />
 
-                    <!-- Індикатор швидкості -->
                     <ProgressBar Style="{StaticResource SpeedMeterStyle}" 
                                  Foreground="{StaticResource UploadBrush}"
                                  Maximum="300"
@@ -165,23 +190,25 @@
             <!-- Ping Card -->
             <Border Grid.Column="2" Style="{StaticResource ResultCardStyle}">
                 <StackPanel>
-                    <!-- Іконка ping -->
                     <TextBlock Text="⟳" 
-                               FontSize="24" 
+                               FontSize="16" 
                                HorizontalAlignment="Center" 
                                Foreground="{StaticResource PingBrush}"
                                Margin="0,0,0,8" />
 
-                    <!-- Значення пінгу -->
-                    <TextBlock Style="{StaticResource SpeedValueStyle}" 
-                               Foreground="{StaticResource PingBrush}"
-                               Text="{Binding Ping.Latency, StringFormat={}{0:F0}, Mode=OneWay}" />
+                    <TextBlock x:Name="PingValueText"
+                               Style="{StaticResource SpeedValueStyle}" 
+                               Foreground="{StaticResource PingBrush}">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} ms">
+                                <Binding Path="Ping.Latency" StringFormat="F0" Converter="{StaticResource DecimalSeparatorConverter}"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
 
-                    <!-- Мітка пінгу -->
                     <TextBlock Style="{StaticResource SpeedLabelStyle}" 
-                               Text="Ping ms" />
+                               Text="Ping" />
 
-                    <!-- Індикатор пінгу (менше - краще) -->
                     <ProgressBar Style="{StaticResource SpeedMeterStyle}" 
                                  Foreground="{StaticResource PingBrush}"
                                  Maximum="100"
@@ -190,10 +217,62 @@
             </Border>
         </Grid>
 
-        <!-- Інформація про сервер -->
-        <Border Grid.Row="2" Style="{StaticResource ResultCardStyle}" Margin="4,16,4,0">
+        <!-- Additional metrics -->
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Jitter Card -->
+            <Border Grid.Column="0" Style="{StaticResource ResultCardStyle}" Margin="4,0,2,0">
+                <StackPanel>
+                    <TextBlock Text="Jitter" 
+                               FontSize="14" 
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource JitterBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,4"/>
+
+                    <TextBlock FontSize="24"
+                               Foreground="{StaticResource JitterBrush}"
+                               HorizontalAlignment="Center">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} ms">
+                                <Binding Path="Ping.Jitter" StringFormat="F1" Converter="{StaticResource DecimalSeparatorConverter}"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- Packet Loss Card -->
+            <Border Grid.Column="1" Style="{StaticResource ResultCardStyle}" Margin="2,0,4,0">
+                <StackPanel>
+                    <TextBlock Text="Packet Loss" 
+                               FontSize="14" 
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource PacketLossBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,4"/>
+
+                    <TextBlock FontSize="24"
+                               Foreground="{StaticResource PacketLossBrush}"
+                               HorizontalAlignment="Center">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0}%">
+                                <Binding Path="PacketLoss" StringFormat="F1" Converter="{StaticResource DecimalSeparatorConverter}"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Server info -->
+        <Border Grid.Row="3" Style="{StaticResource ResultCardStyle}" Margin="4,16,4,0">
             <StackPanel>
-                <TextBlock>
+                <TextBlock Foreground="{DynamicResource TextBrush}">
                     <Run Text="Server: " FontWeight="Medium" />
                     <Run Text="{Binding Server.Name, Mode=OneWay}" />
                     <Run Text=" - " />
@@ -202,27 +281,41 @@
                     <Run Text="{Binding Server.Country, Mode=OneWay}" />
                 </TextBlock>
 
-                <TextBlock Margin="0,8,0,0">
+                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource TextBrush}">
+                    <Run Text="ISP: " FontWeight="Medium" />
+                    <Run Text="{Binding Isp, Mode=OneWay}" />
+                </TextBlock>
+
+                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource TextBrush}">
+                    <Run Text="Connection: " FontWeight="Medium" />
+                    <Run Text="{Binding ConnectionType, Mode=OneWay}" />
+                </TextBlock>
+
+                <TextBlock Margin="0,8,0,0" Foreground="{DynamicResource TextBrush}">
                     <Run Text="Results: " FontWeight="Medium" />
                     <Hyperlink NavigateUri="{Binding Result.Url, Mode=OneWay}" 
-                               RequestNavigate="Hyperlink_RequestNavigate"
-                               Foreground="#3BAAF7">
+                               RequestNavigate="Hyperlink_RequestNavigate">
                         <TextBlock Text="{Binding Result.Url, Mode=OneWay}" 
                                    TextTrimming="CharacterEllipsis" 
-                                   Foreground="#3BAAF7"/>
+                                   Foreground="{DynamicResource HyperlinkBrush}"/>
                     </Hyperlink>
                 </TextBlock>
             </StackPanel>
         </Border>
 
-        <!-- Кнопки дій -->
+        <!-- Action buttons -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-            <Button Content="Copy Results" 
+            <Button Content="Copy Image URL" 
+                    Margin="0,0,8,0"
+                    Style="{StaticResource ActionButtonStyle}"
+                    Click="CopyImageUrl_Click" />
+
+            <Button Content="Copy Text Results" 
                     Margin="0,0,8,0"
                     Style="{StaticResource ActionButtonStyle}"
                     Click="CopyResults_Click" />
 
-            <Button Content="Close" 
+            <Button Content="OK" 
                     Style="{StaticResource ActionButtonStyle}"
                     Click="Ok_Click" />
         </StackPanel>
