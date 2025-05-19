@@ -4,7 +4,7 @@
   "IsGlobal": false,
   "Name": "SpeedTest",
   "Author": "ruslanlap",
-  "Version": "0.90.1",
+  "Version": "1.0.2",
   "Language": "csharp",
   "Website": "https://github.com/ruslanlap/PowerToysRun-SpeedTest",
   "ExecuteFileName": "Community.PowerToys.Run.Plugin.SpeedTest.dll",
