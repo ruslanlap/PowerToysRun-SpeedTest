@@ -1,4 +1,3 @@
-// File: Main.cs
 using ManagedCommon;
 using System;
 using System.Collections.Generic;
@@ -33,14 +32,11 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         private bool _copyToClipboard = false; // Default: do not copy to clipboard
 
         // Regexes to attempt to determine current test stage from stderr.
-        // These might need refinement based on actual `speedtest.exe --format=json` stderr output.
-        // It's possible that in JSON mode, stderr is minimal.
         private static readonly Regex ServerRegex = new Regex(@"(Server:|Hosted by)\s*(?<serverName>[^\(]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex LatencyProgressRegex = new Regex(@"(Ping|Latency):", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex DownloadProgressRegex = new Regex(@"Download:", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex UploadProgressRegex = new Regex(@"Upload:", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex ConnectingRegex = new Regex(@"(Connecting to|Selecting server|Testing from)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
 
         public Main()
         {
@@ -115,14 +111,14 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     Score = 100,
                     Action = _ => false
                 });
-                if (trimmedQuery == "cancel" || "spt cancel".Contains(trimmedQuery)) // Allow "cancel" or "spt cancel"
+                if (trimmedQuery == "cancel" || "spt cancel".Contains(trimmedQuery))
                 {
                     results.Add(new Result
                     {
                         Title = "Cancel Speed Test",
                         SubTitle = "Stops the current speed test.",
-                        IcoPath = _iconPath, // TODO: Consider a different icon for cancel
-                        Score = 110, // Higher score to appear first if typing "cancel"
+                        IcoPath = _iconPath,
+                        Score = 110,
                         Action = _ =>
                         {
                             CancelSpeedTest();
@@ -141,9 +137,8 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     Score = 100,
                     Action = _ =>
                     {
-                        // Run the speed test on a background thread to avoid blocking PowerToys Run UI
                         Task.Run(async () => await RunSpeedTestAsync());
-                        return true; // Return true to hide the PowerToys Run window
+                        return true;
                     }
                 });
             }
@@ -166,7 +161,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 {
                     // Ignore if already disposed
                 }
-                // _isRunningTest will be set to false in the finally block of RunSpeedTestAsync
             }
             else if (!_isRunningTest && showNotifications)
             {
@@ -197,9 +191,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             _cancellationTokenSource = new CancellationTokenSource();
             var token = _cancellationTokenSource.Token;
 
-            // Inform PowerToys Run that the query should change to reflect the running state
             Application.Current.Dispatcher.Invoke(() => _context.API.ChangeQuery("spt running..."));
-
 
             LoadingWindow loadingWindow = null;
             Application.Current.Dispatcher.Invoke(() =>
@@ -207,24 +199,24 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 loadingWindow = new LoadingWindow();
                 loadingWindow.Show();
                 loadingWindow.UpdateStage(LoadingWindow.TestStage.Connecting);
-                loadingWindow.UpdateDetail("Initializing speed test..."); // Generic initial message
+                loadingWindow.UpdateDetail("Initializing speed test...");
             });
 
             var cliJsonOutput = new StringBuilder();
-            var cliStdErrAggregator = new StringBuilder(); // To aggregate stderr for display
+            var cliStdErrAggregator = new StringBuilder();
 
             try
             {
                 var psi = new ProcessStartInfo
                 {
-                    FileName = File.Exists(_cliPath) ? _cliPath : "speedtest", // Use bundled first, then PATH
+                    FileName = File.Exists(_cliPath) ? _cliPath : "speedtest",
                     Arguments = "--accept-license --accept-gdpr --format=json",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true,
                     StandardOutputEncoding = Encoding.UTF8,
-                    StandardErrorEncoding = Encoding.UTF8 // Important for non-ASCII characters in server names etc.
+                    StandardErrorEncoding = Encoding.UTF8
                 };
 
                 using var process = new Process { StartInfo = psi };
@@ -241,16 +233,13 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 {
                     if (e.Data != null)
                     {
-                        // Don't trim the data, keep all whitespace
                         string line = e.Data;
                         cliStdErrAggregator.AppendLine(line);
 
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            // Update the LoadingWindow with the aggregated stderr
                             loadingWindow?.UpdateCLIOutput(cliStdErrAggregator.ToString());
 
-                            // Try to extract speed info for display in the CurrentSpeedText
                             if (line.Contains("Download", StringComparison.OrdinalIgnoreCase) && 
                                 !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
                             {
@@ -313,36 +302,34 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     _context.API.ShowMsg("Speed Test Canceled", "The speed test was canceled by the user.", _iconPath);
                     return;
                 }
-                // If process exited due to error before JSON output, this will be handled below
-                 Application.Current.Dispatcher.Invoke(() =>
+
+                Application.Current.Dispatcher.Invoke(() =>
                 {
                     loadingWindow?.UpdateStage(LoadingWindow.TestStage.Complete);
                     loadingWindow?.UpdateDetail("Test finished. Processing results...");
                 });
-
             }
             catch (OperationCanceledException)
             {
                 Application.Current.Dispatcher.Invoke(() => loadingWindow?.Close());
                 _context.API.ShowMsg("Speed Test Canceled", "The speed test operation was canceled.", _iconPath);
-                return; // Exit the method
+                return;
             }
             catch (Exception ex)
             {
                 Application.Current.Dispatcher.Invoke(() => loadingWindow?.Close());
                 _context.API.ShowMsg("Speed Test Error", $"Error during speed test execution: {ex.Message}\nStderr: {cliStdErrAggregator}", _iconPath);
-                return; // Exit the method
+                return;
             }
-            finally // This block will always execute
+            finally
             {
                 _isRunningTest = false;
                 _cancellationTokenSource?.Dispose();
                 _cancellationTokenSource = null;
-                // Reset the query in PowerToys Run back to the default for this plugin
                 Application.Current.Dispatcher.Invoke(() => _context.API.ChangeQuery("spt "));
             }
 
-            Application.Current.Dispatcher.Invoke(() => loadingWindow?.Close()); // Close loading window before showing results
+            Application.Current.Dispatcher.Invoke(() => loadingWindow?.Close());
 
             SpeedTestResult resultData = null;
             string finalJsonOutput = cliJsonOutput.ToString();
@@ -357,17 +344,16 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             try
             {
                 resultData = ParseJsonOutput(finalJsonOutput);
-                if (resultData == null) // Should not happen if ParseJsonOutput throws on error
+                if (resultData == null)
                 {
-                     throw new InvalidDataException("Failed to parse JSON output (ParseJsonOutput returned null)." +
-                                                   (cliStdErrAggregator.Length > 0 ? $"\nStandard Error Output:\n{cliStdErrAggregator}" : ""));
+                    throw new InvalidDataException("Failed to parse JSON output (ParseJsonOutput returned null)." +
+                                                  (cliStdErrAggregator.Length > 0 ? $"\nStandard Error Output:\n{cliStdErrAggregator}" : ""));
                 }
             }
-            catch (Exception ex) // Catch exceptions from ParseJsonOutput or other issues
+            catch (Exception ex)
             {
                 _context.API.ShowMsg("Result Parsing Error", $"Failed to process speed test results: {ex.Message}\nRaw JSON (first 500 chars): {finalJsonOutput.Substring(0, Math.Min(500, finalJsonOutput.Length))}", _iconPath);
                 #if DEBUG
-                // For easier debugging in development, show more details.
                 string fullErrorMsg = $"Failed to parse results: {ex.Message}\n\nRaw JSON:\n{finalJsonOutput}\n\nStderr:\n{cliStdErrAggregator}";
                 Application.Current.Dispatcher.Invoke(() =>
                     MessageBox.Show(fullErrorMsg, "Detailed JSON Parse Error (DEBUG)", MessageBoxButton.OK, MessageBoxImage.Error)
@@ -376,7 +362,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 return;
             }
 
-            // If we successfully got results
             if (resultData != null)
             {
                 Application.Current.Dispatcher.Invoke(() =>
@@ -385,7 +370,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     {
                         string message = "Speed test completed successfully.";
                         
-                        // Only copy to clipboard if the option is enabled
                         if (_copyToClipboard)
                         {
                             Clipboard.SetText(resultData.ToString());
@@ -395,12 +379,12 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                         _context.API.ShowMsg("Speed Test Results", message, _iconPath);
 
                         var resultsWindow = new ResultsWindow(resultData);
-                        resultsWindow.ShowDialog(); // This shows the ResultsWindow
+                        resultsWindow.ShowDialog();
                     }
-                    catch (Exception ex) // Catch errors specifically from showing window or clipboard
+                    catch (Exception ex)
                     {
-                         _context.API.ShowMsg("UI Error", $"Error displaying results window: {ex.Message}", _iconPath);
-                         Debug.WriteLine($"ResultsWindow display or Clipboard error: {ex}"); // Log for dev
+                        _context.API.ShowMsg("UI Error", $"Error displaying results window: {ex.Message}", _iconPath);
+                        Debug.WriteLine($"ResultsWindow display or Clipboard error: {ex}");
                     }
                 });
             }
@@ -410,7 +394,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         {
             try
             {
-                // Try to get the full path of speedtest.exe if it's in PATH
                 using (Process process = new Process())
                 {
                     process.StartInfo.FileName = "where";
@@ -426,12 +409,9 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             }
             catch
             {
-                // If 'where' command fails or other issues, assume not in PATH for safety.
-                // Alternatively, could try running "speedtest --version" and check exit code.
                 return false;
             }
         }
-
 
         private SpeedTestResult ParseJsonOutput(string jsonOutput)
         {
@@ -445,8 +425,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             {
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true, // Good for flexibility
-                    // Add custom converters if needed for specific types (e.g., DateTime if not ISO 8601)
+                    PropertyNameCaseInsensitive = true,
                 };
                 var result = JsonSerializer.Deserialize<SpeedTestResult>(jsonOutput, options);
 
@@ -455,15 +434,14 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     throw new JsonException("Deserialization returned null. JSON might be valid but not matching the expected structure.");
                 }
 
-                result.UsingCliValues = true; // Mark that these are directly from the source
+                result.UsingCliValues = true;
                 return result;
             }
             catch (JsonException jsonEx)
             {
-                // Provide more context for debugging JSON issues
                 Debug.WriteLine($"JSON Deserialization Error: {jsonEx.Message}. Path: {jsonEx.Path}, Line: {jsonEx.LineNumber}, Pos: {jsonEx.BytePositionInLine}");
                 Debug.WriteLine($"Problematic JSON (first 1000 chars): {jsonOutput.Substring(0, Math.Min(1000, jsonOutput.Length))}");
-                throw; // Re-throw to be caught by the caller in RunSpeedTestAsync's catch block
+                throw;
             }
         }
 
@@ -474,28 +452,23 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         {
             try
             {
-                // Cancel any running test without showing notifications
                 CancelSpeedTest(showNotifications: false);
                 
-                // Clean up cancellation token source
                 if (_cancellationTokenSource != null)
                 {
                     _cancellationTokenSource.Dispose();
                     _cancellationTokenSource = null;
                 }
 
-                // Unsubscribe from events
                 if (_context?.API != null)
                 {
                     _context.API.ThemeChanged -= OnThemeChanged;
                 }
 
-                // Save settings before disposing
                 SaveSettings();
             }
             catch (Exception ex)
             {
-                // Log but don't throw from Dispose
                 Debug.WriteLine($"Error during plugin disposal: {ex}");
             }
             finally
@@ -507,15 +480,15 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         }
 
         // ISettingProvider implementation
-        public System.Windows.Controls.Control CreateSettingPanel()
+        public Control CreateSettingPanel()
         {
-            var stackPanel = new System.Windows.Controls.StackPanel();
+            var stackPanel = new StackPanel();
             
-            var checkBox = new System.Windows.Controls.CheckBox
+            var checkBox = new CheckBox
             {
                 Content = "Copy results to clipboard automatically",
                 IsChecked = _copyToClipboard,
-                Margin = new System.Windows.Thickness(10)
+                Margin = new Thickness(10)
             };
             
             checkBox.Checked += (sender, e) =>
@@ -533,6 +506,41 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             stackPanel.Children.Add(checkBox);
             
             return stackPanel;
+        }
+
+        // Added to implement ISettingProvider.AdditionalOptions
+        public IEnumerable<PluginAdditionalOption> AdditionalOptions
+        {
+            get
+            {
+                return new List<PluginAdditionalOption>
+                {
+                    new PluginAdditionalOption
+                    {
+                        Key = "CopyToClipboard",
+                        DisplayLabel = "Copy results to clipboard automatically",
+                        Value = _copyToClipboard,
+                        PluginOptionType = PluginAdditionalOption.AdditionalOptionType.Checkbox
+                    }
+                };
+            }
+        }
+
+        // Added to implement ISettingProvider.UpdateSettings
+        public void UpdateSettings(PowerLauncherPluginSettings settings)
+        {
+            if (settings?.AdditionalOptions != null)
+            {
+                foreach (var option in settings.AdditionalOptions)
+                {
+                    if (option.Key == "CopyToClipboard")
+                    {
+                        _copyToClipboard = option.Value;
+                        SaveSettings();
+                        break;
+                    }
+                }
+            }
         }
     }
 }
