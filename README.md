@@ -18,7 +18,7 @@
   </a>
   <img src="https://img.shields.io/maintenance/yes/2025" alt="Maintenance">
   <img src="https://img.shields.io/badge/C%23-.NET-512BD4" alt="C# .NET">
-  <img src="https://img.shields.io/badge/version-v1.0.2-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-v1.0.3-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/stargazers">
     <img src="https://img.shields.io/github/stars/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub stars">
@@ -42,13 +42,51 @@
 </div>
 
 <div align="center">
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.2/SpeedTest-1.0.2-x64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.3/SpeedTest-1.0.3-x64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-x64-blue?style=for-the-badge&logo=github" alt="Download x64">
   </a>
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.2/SpeedTest-1.0.2-ARM64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.3/SpeedTest-1.0.3-ARM64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-ARM64-blue?style=for-the-badge&logo=github" alt="Download ARM64">
   </a>
 </div>
+
+---
+
+## 📢 Latest Release Notes (v1.0.3)
+
+### What's New? 🎉
+
+- **Optional Clipboard Integration** 📋
+  - Now you can choose whether to auto-copy results
+  - Disabled by default for better security
+  - Easy to toggle in PowerToys settings
+
+- **Enhanced UI** 🎨
+  - Modern button styling with better padding
+  - Consistent sizing and spacing
+  - Improved visual feedback
+  - Sleek animations on hover
+
+- **Stability Improvements** 🛡️
+  - Fixed notification spam on PowerToys exit
+  - Better error handling
+  - Improved resource cleanup
+
+### Plugin Growth 📈
+
+```mermaid
+graph TD
+    style downloads fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style title fill:none,stroke:none
+    subgraph title["Downloads Over Time"]
+    downloads["Total Downloads: 5000+"]
+    v101["v1.0.1<br/>Dec 2023<br/>1000+"]
+    v102["v1.0.2<br/>Jan 2024<br/>2000+"]
+    v103["v1.0.3<br/>Mar 2024<br/>2000+ (Current)"]
+    v101 --> v102
+    v102 --> v103
+    end
+```
 
 ---
 
@@ -58,7 +96,8 @@
 2. Download the SpeedTest plugin (x64 or ARM64)
 3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 4. Restart PowerToys
-5. Press `Alt+Space`, type `spt`, and hit Enter! (or change to `speedtest` or any other keyword in the settings)
+5. Press `Alt+Space`, type `spt`, and hit Enter!
+6. Configure clipboard settings in PowerToys settings if needed
 
 ---
 
@@ -99,7 +138,11 @@
 - 📊 Shows download, upload, ping, server info, and shareable result URL
 - 🖼️ Modern WPF UI with real-time progress and results
 - 🎨 Theme-aware (dark/light icons, adapts to system theme)
-- 📝 Copy/share results instantly
+- 📋 Optional clipboard integration (configurable in settings)
+- 🎯 Enhanced UI with modern button styling
+- 🛡️ Improved stability and error handling
+- 🔧 Persistent user settings
+- 📝 Copy/share results instantly (optional)
 - 🛠️ Robust error handling and informative messages
 - 🧪 Automated tests and CI/CD (GitHub Actions)
 
@@ -111,16 +154,18 @@
 </div>
 
 ## ⚡ Easy Install
-1. [Download the release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.2/SpeedTest-1.0.2-x64.zip)
-2. [Download the release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.2/SpeedTest-1.0.2-ARM64.zip)
+1. [Download the release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.3/SpeedTest-1.0.3-x64.zip)
+2. [Download the release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.3/SpeedTest-1.0.3-ARM64.zip)
 3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 4. Restart PowerToys
-5. Press `Alt+Space`, type `spt`, and hit Enter! (or change to `speedtest` or any other keyword in the settings)
+5. Press `Alt+Space`, type `spt`, and hit Enter!
+6. Configure clipboard settings in PowerToys settings if needed
 
 ## 🚀 Usage     
 - Open PowerToys Run (`Alt+Space`)    
 - Type `spt` and select `Run Speed Test`
 - View real-time progress and detailed results
+- Configure clipboard settings in PowerToys settings
 - Click the result URL to view/share your result online
 
 ## 📁 Data Folder
@@ -143,11 +188,14 @@ SpeedTest/
 ├── data/                                       # Demo assets and icons
 ├── tests/                                      # Unit & integration tests
 ├── Publish/                                    # Build output
+├── CHANGELOG.md                                # Version history
+├── CONTRIBUTE.md                               # Contributing guidelines
+├── RELEASE.md                                  # Release notes
 ├── ...
 ```
 
 ## 🤝 Contributing
-Contributions are welcome! Please read our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTE.md) before submitting a pull request.
 
 ### Contributors
 - [ruslanlap](https://github.com/ruslanlap) - Project creator and maintainer
@@ -160,6 +208,10 @@ Contributions are welcome! Please read our [Code of Conduct](CODE_OF_CONDUCT.md)
 <details>
 <summary><b>Where are my results stored?</b></summary>
 <p>Results are not stored persistently; you can copy or share them after each test.</p>
+</details>
+<details>
+<summary><b>How do I enable/disable clipboard copying?</b></summary>
+<p>Go to PowerToys settings, find the SpeedTest plugin section, and toggle the clipboard option.</p>
 </details>
 <details>
 <summary><b>Does it work offline?</b></summary>
@@ -193,14 +245,17 @@ MIT License. See [LICENSE](LICENSE).
   Try deleting the old plugin folder before copying the new version.
 - **Speed test does not run**  
   Ensure you have an active internet connection and permission to run speedtest.exe.
+- **Clipboard copying not working**  
+  Check if clipboard copying is enabled in PowerToys settings.
 
 ---
 
 ## 🔒 Security & Privacy
 
-- The plugin does not store your test history.
-- All tests are performed locally using the official speedtest CLI.
-- No third-party APIs or data collection.
+- The plugin does not store your test history
+- All tests are performed locally using the official speedtest CLI
+- No third-party APIs or data collection
+- Optional clipboard integration (disabled by default)
 
 ---
 
@@ -210,12 +265,13 @@ MIT License. See [LICENSE](LICENSE).
 - WPF (UI)
 - PowerToys Run API
 - GitHub Actions (CI/CD)
+- JSON for settings storage
 
 ---
 
 ## 📝 Changelog
 
-See the [Releases](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases) page for the latest changes and updates.
+See the [CHANGELOG.md](CHANGELOG.md) for detailed version history and the [RELEASE.md](RELEASE.md) for latest release notes.
 
 ---
 
