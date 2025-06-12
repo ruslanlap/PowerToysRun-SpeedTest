@@ -183,7 +183,7 @@ jobs:
       
       - name: Rename release artifacts for convention
         run: |
-          VERSION="1.0.2"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
           mv release-artifacts/SpeedTest-x64.zip release-artifacts/SpeedTest-${VERSION}-x64.zip
           mv release-artifacts/SpeedTest-ARM64.zip release-artifacts/SpeedTest-${VERSION}-ARM64.zip
       

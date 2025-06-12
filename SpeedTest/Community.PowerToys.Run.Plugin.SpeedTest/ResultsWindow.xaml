@@ -78,17 +78,22 @@
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource ButtonBlueBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-            <Setter Property="Padding" Value="16,8" />
+            <Setter Property="Padding" Value="20,10" />
+            <Setter Property="MinWidth" Value="120" />
+            <Setter Property="Height" Value="36" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="13" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center" 
+                                            Margin="{TemplateBinding Padding}" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -96,6 +101,10 @@
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Opacity" Value="0.9" />
+                    <Setter Property="Background" Value="#1A88FF" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#0066DD" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -304,14 +313,14 @@
         </Border>
 
         <!-- Action buttons -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Content="Copy Image URL" 
-                    Margin="0,0,8,0"
+                    Margin="0,0,12,0"
                     Style="{StaticResource ActionButtonStyle}"
                     Click="CopyImageUrl_Click" />
 
             <Button Content="Copy Text Results" 
-                    Margin="0,0,8,0"
+                    Margin="0,0,12,0"
                     Style="{StaticResource ActionButtonStyle}"
                     Click="CopyResults_Click" />
 

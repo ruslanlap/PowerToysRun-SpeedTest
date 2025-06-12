@@ -361,7 +361,7 @@
             <TextBlock x:Name="ServerNameText"
                        Text=""
                        HorizontalAlignment="Center"
-                       FontSize="11"
+                       FontSize="12"
                        Foreground="#40C057"
                        Margin="0,6,0,0"/>
         </StackPanel>

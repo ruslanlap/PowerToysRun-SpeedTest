@@ -3,20 +3,21 @@ using ManagedCommon;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization; // Keep for CultureInfo if any string parsing needs it, though JSON handles numbers well.
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions; // Kept for minimal stderr parsing for stages
+using System.Text.RegularExpressions; 
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls; 
 using Wox.Plugin;
 
 namespace Community.PowerToys.Run.Plugin.SpeedTest
 {
-    public class Main : IPlugin, IPluginI18n, IDisposable
+    public class Main : IPlugin, IPluginI18n, ISettingProvider, IDisposable
     {
         public static string PluginID => "5A0F7ED1D3F24B0A900732839D0E43DB";
         public string Name => "SpeedTest";
@@ -27,6 +28,9 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         private readonly string _cliPath;
         private string _iconPath;
         private CancellationTokenSource _cancellationTokenSource;
+        
+        // Settings
+        private bool _copyToClipboard = false; // Default: do not copy to clipboard
 
         // Regexes to attempt to determine current test stage from stderr.
         // These might need refinement based on actual `speedtest.exe --format=json` stderr output.
@@ -50,6 +54,50 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _context.API.ThemeChanged += OnThemeChanged;
             UpdateIconPath(_context.API.GetCurrentTheme());
+            
+            // Load settings
+            LoadSettings();
+        }
+
+        private void LoadSettings()
+        {
+            try
+            {
+                var settingsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "settings.json");
+                if (File.Exists(settingsPath))
+                {
+                    var settingsJson = File.ReadAllText(settingsPath);
+                    var settings = JsonSerializer.Deserialize<Dictionary<string, object>>(settingsJson);
+                    if (settings.ContainsKey("CopyToClipboard"))
+                    {
+                        _copyToClipboard = Convert.ToBoolean(settings["CopyToClipboard"]);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to load settings: {ex.Message}");
+                // Use default values if loading fails
+            }
+        }
+        
+        private void SaveSettings()
+        {
+            try
+            {
+                var settings = new Dictionary<string, object>
+                {
+                    ["CopyToClipboard"] = _copyToClipboard
+                };
+                
+                var settingsJson = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+                var settingsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "settings.json");
+                File.WriteAllText(settingsPath, settingsJson);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to save settings: {ex.Message}");
+            }
         }
 
         public List<Result> Query(Query query)
@@ -102,14 +150,17 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             return results;
         }
 
-        private void CancelSpeedTest()
+        private void CancelSpeedTest(bool showNotifications = true)
         {
             if (_isRunningTest && _cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 try
                 {
                     _cancellationTokenSource.Cancel();
-                    _context.API.ShowMsg("Speed Test", "Cancellation requested for the speed test.", _iconPath);
+                    if (showNotifications)
+                    {
+                        _context?.API?.ShowMsg("Speed Test", "Cancellation requested for the speed test.", _iconPath);
+                    }
                 }
                 catch (ObjectDisposedException)
                 {
@@ -117,9 +168,9 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 }
                 // _isRunningTest will be set to false in the finally block of RunSpeedTestAsync
             }
-            else if (!_isRunningTest)
+            else if (!_isRunningTest && showNotifications)
             {
-                _context.API.ShowMsg("Speed Test", "No speed test is currently running.", _iconPath);
+                _context?.API?.ShowMsg("Speed Test", "No speed test is currently running.", _iconPath);
             }
         }
 
@@ -332,8 +383,16 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 {
                     try
                     {
-                        Clipboard.SetText(resultData.ToString()); // Copy rich text result to clipboard
-                        _context.API.ShowMsg("Speed Test Results", "Detailed results copied to clipboard.", _iconPath);
+                        string message = "Speed test completed successfully.";
+                        
+                        // Only copy to clipboard if the option is enabled
+                        if (_copyToClipboard)
+                        {
+                            Clipboard.SetText(resultData.ToString());
+                            message = "Detailed results copied to clipboard.";
+                        }
+                        
+                        _context.API.ShowMsg("Speed Test Results", message, _iconPath);
 
                         var resultsWindow = new ResultsWindow(resultData);
                         resultsWindow.ShowDialog(); // This shows the ResultsWindow
@@ -413,17 +472,67 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 
         public void Dispose()
         {
-            CancelSpeedTest(); // Ensure any ongoing test is signaled for cancellation
-            if (_cancellationTokenSource != null)
+            try
             {
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
+                // Cancel any running test without showing notifications
+                CancelSpeedTest(showNotifications: false);
+                
+                // Clean up cancellation token source
+                if (_cancellationTokenSource != null)
+                {
+                    _cancellationTokenSource.Dispose();
+                    _cancellationTokenSource = null;
+                }
+
+                // Unsubscribe from events
+                if (_context?.API != null)
+                {
+                    _context.API.ThemeChanged -= OnThemeChanged;
+                }
+
+                // Save settings before disposing
+                SaveSettings();
             }
-            if (_context?.API != null) // Check _context and _context.API for null
+            catch (Exception ex)
             {
-                _context.API.ThemeChanged -= OnThemeChanged;
+                // Log but don't throw from Dispose
+                Debug.WriteLine($"Error during plugin disposal: {ex}");
             }
+            finally
+            {
+                _context = null;
+            }
+
             GC.SuppressFinalize(this);
+        }
+
+        // ISettingProvider implementation
+        public System.Windows.Controls.Control CreateSettingPanel()
+        {
+            var stackPanel = new System.Windows.Controls.StackPanel();
+            
+            var checkBox = new System.Windows.Controls.CheckBox
+            {
+                Content = "Copy results to clipboard automatically",
+                IsChecked = _copyToClipboard,
+                Margin = new System.Windows.Thickness(10)
+            };
+            
+            checkBox.Checked += (sender, e) =>
+            {
+                _copyToClipboard = true;
+                SaveSettings();
+            };
+            
+            checkBox.Unchecked += (sender, e) =>
+            {
+                _copyToClipboard = false;
+                SaveSettings();
+            };
+            
+            stackPanel.Children.Add(checkBox);
+            
+            return stackPanel;
         }
     }
 }
