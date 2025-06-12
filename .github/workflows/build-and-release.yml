@@ -2,9 +2,8 @@ name: Build and Release SpeedTest Plugin
 
 on:
   push:
-    branches:
-      - main
-      - master
+    # branches:
+    #   - master
     tags:
       - 'v*'
 
