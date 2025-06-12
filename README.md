@@ -74,21 +74,6 @@
 
 ### Plugin Growth 📈
 
-```mermaid
-graph TD
-    style downloads fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style title fill:none,stroke:none
-    subgraph title["Downloads Over Time"]
-    downloads["Total Downloads: 5000+"]
-    v101["v1.0.1<br/>Dec 2023<br/>1000+"]
-    v102["v1.0.2<br/>Jan 2024<br/>2000+"]
-    v103["v1.0.3<br/>Mar 2024<br/>2000+ (Current)"]
-    v101 --> v102
-    v102 --> v103
-    end
-```
-
----
 
 ## ⚡ Quick Start
 
