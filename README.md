@@ -52,12 +52,6 @@
 
 <br>
 
-<div align="center">
-  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/total?style=for-the-badge&label=📥%20TOTAL%20DOWNLOADS&color=success&labelColor=2d3748" alt="Total Downloads" height="40">
-  <br>
-  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/latest/total?style=for-the-badge&label=📊%20LATEST%20RELEASE&color=blue&labelColor=2d3748" alt="Latest Release Downloads" height="40">
-</div>
-
 ---
 ## 📢 Latest Release Notes (v1.0.3)
 
@@ -83,7 +77,7 @@
 
 <div align="center">
   <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/total?style=for-the-badge&label=Total%20Downloads" alt="Total Downloads">
-  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/latest/total?style=for-the-badge&label=Latest%20Release" alt="Latest Release Downloads">
+  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/latest/total?style=for-the-badge&label=Latest%20Release" height="48"  alt="Latest Release Downloads">
 </div>
 
 
