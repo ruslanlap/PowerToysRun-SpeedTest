@@ -362,9 +362,9 @@
                             BorderBrush="#4D6366F1"
                             BorderThickness="0,0,0,1">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
-                            <Ellipse Width="8" Height="8" Fill="#EF4444" Margin="0,0,6,0"/>
-                            <Ellipse Width="8" Height="8" Fill="#F59E0B" Margin="0,0,6,0"/>
-                            <Ellipse Width="8" Height="8" Fill="#10B981" Margin="0,0,12,0"/>
+                            <Ellipse Width="8" Height="8" Fill="#FFFFFF" Margin="0,0,6,0"/>
+                            <Ellipse Width="8" Height="8" Fill="#FFFFFF" Margin="0,0,6,0"/>
+                            <Ellipse Width="8" Height="8" Fill="#FFFFFF" Margin="0,0,12,0"/>
                             <TextBlock Text="Terminal Output" FontSize="12" 
                                       Foreground="{StaticResource TextSecondaryBrush}" 
                                       VerticalAlignment="Center"/>
