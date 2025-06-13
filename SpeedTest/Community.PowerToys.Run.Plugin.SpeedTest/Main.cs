@@ -369,15 +369,10 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 {
                     try
                     {
-                        string message = "Speed test completed successfully.";
-                        
                         if (_copyToClipboard)
                         {
                             Clipboard.SetText(resultData.ToString());
-                            message = "Detailed results copied to clipboard.";
                         }
-                        
-                        _context.API.ShowMsg("Speed Test Results", message, _iconPath);
 
                         var resultsWindow = new ResultsWindow(resultData);
                         resultsWindow.ShowDialog();
