@@ -22,47 +22,15 @@
         <SolidColorBrush x:Key="WarningBrush" Color="#FAB005" />
         <SolidColorBrush x:Key="ErrorBrush" Color="#FA5252" />
 
-        <!-- Enhanced Gradients -->
-        <LinearGradientBrush x:Key="PrimaryArcGradient" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#4DABF7" Offset="0"/>
-            <GradientStop Color="#339AF0" Offset="1"/>
-        </LinearGradientBrush>
-
-        <LinearGradientBrush x:Key="SecondaryArcGradient" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#339AF0" Offset="0"/>
-            <GradientStop Color="#228BE6" Offset="1"/>
-        </LinearGradientBrush>
-
-        <RadialGradientBrush x:Key="CenterGlowBrush">
-            <GradientStop Color="#334DABF7" Offset="0"/>
-            <GradientStop Color="#000F1117" Offset="1"/>
-        </RadialGradientBrush>
-
-        <!-- Enhanced Animation Storyboard -->
+        <!-- Single Circle Animation -->
         <Storyboard x:Key="SpinnerAnimation" RepeatBehavior="Forever">
-            <!-- Outer arc rotation (clockwise) -->
+            <!-- Single circle rotation -->
             <DoubleAnimation
-                Storyboard.TargetName="OuterArcRotation"
+                Storyboard.TargetName="SpinnerRotation"
                 Storyboard.TargetProperty="Angle"
                 From="0"
                 To="360"
-                Duration="0:0:3.5" />
-
-            <!-- Middle arc rotation (counter-clockwise) -->
-            <DoubleAnimation
-                Storyboard.TargetName="MiddleArcRotation"
-                Storyboard.TargetProperty="Angle"
-                From="360"
-                To="0"
-                Duration="0:0:2.8" />
-
-            <!-- Inner arc rotation (clockwise, faster) -->
-            <DoubleAnimation
-                Storyboard.TargetName="InnerArcRotation"
-                Storyboard.TargetProperty="Angle"
-                From="0"
-                To="360"
-                Duration="0:0:1.8" />
+                Duration="0:0:2" />
 
             <!-- GO text pulse animation -->
             <DoubleAnimation
@@ -80,39 +48,6 @@
                 To="1.05"
                 Duration="0:0:1.5"
                 AutoReverse="True"
-                RepeatBehavior="Forever" />
-
-            <!-- Center glow animation -->
-            <DoubleAnimation
-                Storyboard.TargetName="CenterGlow"
-                Storyboard.TargetProperty="Opacity"
-                From="0.3"
-                To="0.6"
-                Duration="0:0:2.5"
-                AutoReverse="True"
-                RepeatBehavior="Forever" />
-
-            <!-- Pulse wave animation -->
-            <DoubleAnimation
-                Storyboard.TargetName="PulseScale"
-                Storyboard.TargetProperty="ScaleX"
-                From="0.9"
-                To="1.1"
-                Duration="0:0:2.5"
-                RepeatBehavior="Forever" />
-            <DoubleAnimation
-                Storyboard.TargetName="PulseScale"
-                Storyboard.TargetProperty="ScaleY"
-                From="0.9"
-                To="1.1"
-                Duration="0:0:2.5"
-                RepeatBehavior="Forever" />
-            <DoubleAnimation
-                Storyboard.TargetName="PulseWave"
-                Storyboard.TargetProperty="Opacity"
-                From="0.4"
-                To="0"
-                Duration="0:0:2.5"
                 RepeatBehavior="Forever" />
         </Storyboard>
 
@@ -167,115 +102,33 @@
                    Foreground="{StaticResource TextBrush}"
                    Margin="0,0,0,24"/>
 
-        <!-- Enhanced Central GO button with progress -->
+        <!-- Simple Central GO button with single circle -->
         <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,20">
-            <!-- Pulse wave effect -->
-            <Ellipse Width="180" Height="180" x:Name="PulseWave" Opacity="0.2">
-                <Ellipse.Fill>
-                    <RadialGradientBrush>
-                        <GradientStop Color="#4DABF7" Offset="0.7"/>
-                        <GradientStop Color="Transparent" Offset="1"/>
-                    </RadialGradientBrush>
-                </Ellipse.Fill>
-                <Ellipse.RenderTransform>
-                    <ScaleTransform x:Name="PulseScale" CenterX="90" CenterY="90"/>
-                </Ellipse.RenderTransform>
-            </Ellipse>
+            <!-- Dark background circle -->
+            <Ellipse Width="200" Height="200" Fill="#1A1D28" Stroke="#2C2E3B" StrokeThickness="2"/>
 
-            <!-- Dark background circle with subtle gradient -->
-            <Ellipse Width="160" Height="160">
-                <Ellipse.Fill>
-                    <RadialGradientBrush>
-                        <GradientStop Color="#1A1D28" Offset="0"/>
-                        <GradientStop Color="#151824" Offset="1"/>
-                    </RadialGradientBrush>
-                </Ellipse.Fill>
-            </Ellipse>
-
-            <!-- Center glow effect -->
-            <Ellipse x:Name="CenterGlow" Width="140" Height="140" Fill="{StaticResource CenterGlowBrush}" Opacity="0.3"/>
-
-            <!-- Static track circle outline with shadow -->
-            <Ellipse Width="160" Height="160" Stroke="#2C2E3B" StrokeThickness="1.5">
-                <Ellipse.Effect>
-                    <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#1A1D28" Opacity="0.5"/>
-                </Ellipse.Effect>
-            </Ellipse>
-
-            <!-- Spinning arcs - enhanced with multiple layers -->
-            <Canvas Width="160" Height="160">
-                <!-- Outer arc (clockwise) -->
+            <!-- Single spinning circle -->
+            <Canvas Width="200" Height="200">
                 <Grid>
                     <Grid.RenderTransform>
-                        <RotateTransform x:Name="OuterArcRotation" CenterX="80" CenterY="80"/>
+                        <RotateTransform x:Name="SpinnerRotation" CenterX="100" CenterY="100"/>
                     </Grid.RenderTransform>
-                    <Ellipse Width="158"
-                             Height="158"
-                             Stroke="{StaticResource PrimaryArcGradient}"
+                    <Ellipse Width="200"
+                             Height="200"
+                             Stroke="#4DABF7"
                              StrokeThickness="4"
-                             StrokeDashArray="353 118"
-                             Fill="Transparent"
-                             Canvas.Left="1"
-                             Canvas.Top="1">
+                             StrokeDashArray="150 100"
+                             Fill="Transparent">
                         <Ellipse.Effect>
-                            <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#4DABF7" Opacity="0.4"/>
+                            <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#4DABF7" Opacity="0.6"/>
                         </Ellipse.Effect>
-                    </Ellipse>
-                </Grid>
-
-                <!-- Middle arc (counter-clockwise) -->
-                <Grid>
-                    <Grid.RenderTransform>
-                        <RotateTransform x:Name="MiddleArcRotation" CenterX="80" CenterY="80"/>
-                    </Grid.RenderTransform>
-                    <Ellipse Width="140"
-                             Height="140"
-                             Stroke="{StaticResource SecondaryArcGradient}"
-                             StrokeThickness="3"
-                             StrokeDashArray="250 170"
-                             Fill="Transparent"
-                             Canvas.Left="10"
-                             Canvas.Top="10"/>
-                </Grid>
-
-                <!-- Inner arc (clockwise, faster) -->
-                <Grid>
-                    <Grid.RenderTransform>
-                        <RotateTransform x:Name="InnerArcRotation" CenterX="80" CenterY="80"/>
-                    </Grid.RenderTransform>
-                    <Ellipse Width="120"
-                             Height="120"
-                             StrokeThickness="2.5"
-                             StrokeDashArray="200 100"
-                             Fill="Transparent"
-                             Canvas.Left="20"
-                             Canvas.Top="20">
-                        <Ellipse.Stroke>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#4DABF7" Offset="0"/>
-                                <GradientStop Color="#339AF0" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Ellipse.Stroke>
                     </Ellipse>
                 </Grid>
             </Canvas>
 
-            <!-- Inner circle for GO text background -->
-            <Ellipse Width="110" Height="110">
-                <Ellipse.Fill>
-                    <RadialGradientBrush>
-                        <GradientStop Color="#1A1D28" Offset="0"/>
-                        <GradientStop Color="#151824" Offset="1"/>
-                    </RadialGradientBrush>
-                </Ellipse.Fill>
-                <Ellipse.Effect>
-                    <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="Black" Opacity="0.4"/>
-                </Ellipse.Effect>
-            </Ellipse>
-
-            <!-- GO text with enhanced scale animation -->
+            <!-- GO text -->
             <TextBlock Text="GO"
-                       FontSize="38"
+                       FontSize="48"
                        FontWeight="Bold"
                        Foreground="{StaticResource TextBrush}"
                        HorizontalAlignment="Center"
@@ -284,7 +137,7 @@
                     <DropShadowEffect BlurRadius="6" ShadowDepth="0" Color="#4DABF7" Opacity="0.5"/>
                 </TextBlock.Effect>
                 <TextBlock.RenderTransform>
-                    <ScaleTransform x:Name="GoTextScale" CenterX="19" CenterY="19"/>
+                    <ScaleTransform x:Name="GoTextScale" CenterX="24" CenterY="24"/>
                 </TextBlock.RenderTransform>
             </TextBlock>
 
@@ -296,7 +149,7 @@
                        Opacity="0.9"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Bottom"
-                       Margin="0,0,0,32">
+                       Margin="0,0,0,20">
                 <TextBlock.Effect>
                     <DropShadowEffect BlurRadius="3" ShadowDepth="0" Color="#4DABF7" Opacity="0.5"/>
                 </TextBlock.Effect>

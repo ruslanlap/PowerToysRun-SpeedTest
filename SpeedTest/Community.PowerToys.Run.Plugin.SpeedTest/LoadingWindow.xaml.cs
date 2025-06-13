@@ -39,7 +39,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 _spinnerAnimation = FindResource("SpinnerAnimation") as Storyboard;
                 if (_spinnerAnimation != null)
                 {
-                    _spinnerAnimation.Begin(this, true); // Ensure storyboard targets are available
+                    _spinnerAnimation.Begin(this, true);
                 }
                 else
                 {
@@ -48,25 +48,24 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 
                 _dotAnimationTimer = new DispatcherTimer
                 {
-                    Interval = TimeSpan.FromMilliseconds(500) // Faster dot animation
+                    Interval = TimeSpan.FromMilliseconds(500)
                 };
                 _dotAnimationTimer.Tick += AnimateStepIndicators;
                 _dotAnimationTimer.Start();
 
                 _statusUpdateTimer = new DispatcherTimer
                 {
-                    Interval = TimeSpan.FromSeconds(2) // Faster simulation for demo
+                    Interval = TimeSpan.FromSeconds(2)
                 };
                 _statusUpdateTimer.Tick += SimulateStatusUpdate;
                 _statusUpdateTimer.Start();
 
-                UpdateStage(TestStage.Connecting); // Initial stage
-                // Initial texts are set by SimulateStatusUpdate tick 0 (implicitly) or explicitly here
+                UpdateStage(TestStage.Connecting);
                 UpdateStatus("Connecting to server...");
                 UpdateDetail("Initializing speed test...");
-                UpdateCLIOutput(""); // Clear CLI initially
-                UpdateCurrentSpeed(""); // Clear speed initially
-                UpdateServerInfo(""); // Clear server info initially
+                UpdateCLIOutput("");
+                UpdateCurrentSpeed("");
+                UpdateServerInfo("");
             }
             catch (Exception ex)
             {
@@ -81,20 +80,20 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 
             switch (_animationTick)
             {
-                case 1: // State similar to the image
-                    UpdateStage(TestStage.Connecting); // First dot active
+                case 1:
+                    UpdateStage(TestStage.Connecting);
                     UpdateStatus("Connecting to server...");
                     UpdateDetail("Latency: 3.06 ms");
 
                     StringBuilder cliBuilder = new StringBuilder();
                     cliBuilder.AppendLine("Speedtest by Ookla");
                     cliBuilder.AppendLine("Server: UARNet - Lviv (id: 14887)");
-                    cliBuilder.AppendLine("ISP: State Enterprise Scientific and Telecommunicat"); // Truncated as in image
-                    cliBuilder.Append("Idle Latency: 3.06 ms (jitter: 0.36ms, low: 2.65ms, hi"); // Truncated as in image
+                    cliBuilder.AppendLine("ISP: State Enterprise Scientific and Telecommunicat");
+                    cliBuilder.Append("Idle Latency: 3.06 ms (jitter: 0.36ms, low: 2.65ms, hi");
                     UpdateCLIOutput(cliBuilder.ToString());
 
-                    UpdateCurrentSpeed(""); // No speed shown in GO circle in image
-                    UpdateServerInfo(""); // Server info is in CLI
+                    UpdateCurrentSpeed("");
+                    UpdateServerInfo("");
                     break;
                 case 2:
                     UpdateStage(TestStage.Latency);
@@ -173,42 +172,35 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 try
                 {
                     ResetIndicators();
-                    // string statusMessage = ""; // Removed: CS0219 Variable assigned but never used
 
                     switch (stage)
                     {
                         case TestStage.Connecting:
                             if (Step1Indicator != null) Step1Indicator.Style = (Style)FindResource("ActiveStepIndicator");
-                            // statusMessage = "Connecting to server..."; // Removed
                             break;
                         case TestStage.Latency:
                             if (Step1Indicator != null) Step1Indicator.Style = (Style)FindResource("CompletedStepIndicator");
                             if (Step2Indicator != null) Step2Indicator.Style = (Style)FindResource("ActiveStepIndicator");
-                            // statusMessage = "Latency Test..."; // Removed
                             break;
                         case TestStage.Download:
                             if (Step1Indicator != null) Step1Indicator.Style = (Style)FindResource("CompletedStepIndicator");
                             if (Step2Indicator != null) Step2Indicator.Style = (Style)FindResource("CompletedStepIndicator");
                             if (Step3Indicator != null) Step3Indicator.Style = (Style)FindResource("ActiveStepIndicator");
-                            // statusMessage = "Download Test..."; // Removed
                             break;
                         case TestStage.Upload:
                             if (Step1Indicator != null) Step1Indicator.Style = (Style)FindResource("CompletedStepIndicator");
                             if (Step2Indicator != null) Step2Indicator.Style = (Style)FindResource("CompletedStepIndicator");
                             if (Step3Indicator != null) Step3Indicator.Style = (Style)FindResource("CompletedStepIndicator");
                             if (Step4Indicator != null) Step4Indicator.Style = (Style)FindResource("ActiveStepIndicator");
-                            // statusMessage = "Upload Test..."; // Removed
                             break;
                         case TestStage.Complete:
                             if (Step1Indicator != null) Step1Indicator.Style = (Style)FindResource("CompletedStepIndicator");
                             if (Step2Indicator != null) Step2Indicator.Style = (Style)FindResource("CompletedStepIndicator");
                             if (Step3Indicator != null) Step3Indicator.Style = (Style)FindResource("CompletedStepIndicator");
                             if (Step4Indicator != null) Step4Indicator.Style = (Style)FindResource("CompletedStepIndicator");
-                            // statusMessage = "Test Complete!"; // Removed
                             _dotAnimationTimer?.Stop();
                             break;
                         case TestStage.Error:
-                            // statusMessage = "Test Error!"; // Removed
                             var errorStyle = (Style)FindResource("ErrorStepIndicator");
                             if (errorStyle != null)
                             {
@@ -220,11 +212,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                             _dotAnimationTimer?.Stop();
                             break;
                     }
-                    // The logic to use statusMessage was commented out, so the variable itself is removed.
-                    // if (StatusText.Text != "Connecting to server..." || stage != TestStage.Connecting) 
-                    // {
-                    //    UpdateStatus(statusMessage); 
-                    // }
                 }
                 catch (Exception ex)
                 {
