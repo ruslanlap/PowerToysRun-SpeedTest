@@ -1,4 +1,5 @@
 using ManagedCommon;
+using Microsoft.PowerToys.Settings.UI.Library;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -480,8 +481,9 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         }
 
         // ISettingProvider implementation
-        public Control CreateSettingPanel()
+        public System.Windows.Controls.Control CreateSettingPanel()
         {
+            var userControl = new System.Windows.Controls.UserControl();
             var stackPanel = new StackPanel();
             
             var checkBox = new CheckBox
@@ -504,11 +506,11 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             };
             
             stackPanel.Children.Add(checkBox);
+            userControl.Content = stackPanel;
             
-            return stackPanel;
+            return userControl;
         }
 
-        // Added to implement ISettingProvider.AdditionalOptions
         public IEnumerable<PluginAdditionalOption> AdditionalOptions
         {
             get
@@ -526,7 +528,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             }
         }
 
-        // Added to implement ISettingProvider.UpdateSettings
         public void UpdateSettings(PowerLauncherPluginSettings settings)
         {
             if (settings?.AdditionalOptions != null)
