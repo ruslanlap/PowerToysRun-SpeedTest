@@ -3,77 +3,148 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Speed Test in Progress"
-    Height="580"
-    Width="580"
+    Height="720"
+    Width="680"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterScreen"
-    Background="#0F1117"
+    Background="Transparent"
+    AllowsTransparency="True"
+    WindowStyle="None"
     Foreground="White"
-    FontFamily="Segoe UI">
+    FontFamily="Segoe UI Variable Display">
 
     <Window.Resources>
-        <!-- Professional Color Palette -->
-        <SolidColorBrush x:Key="BackgroundBrush" Color="#24273a" />
-        <SolidColorBrush x:Key="CardBrush" Color="#1A1D28" />
-        <SolidColorBrush x:Key="TextBrush" Color="#E4E6F0" />
-        <SolidColorBrush x:Key="HyperlinkBrush" Color="#4DABF7" />
-        <SolidColorBrush x:Key="AccentBrush" Color="#4DABF7" />
-        <SolidColorBrush x:Key="SuccessBrush" Color="#40C057" />
-        <SolidColorBrush x:Key="WarningBrush" Color="#FAB005" />
-        <SolidColorBrush x:Key="ErrorBrush" Color="#FA5252" />
+        <!-- Modern Color Palette with Glassmorphism -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#1A1B23" />
+        <SolidColorBrush x:Key="CardBrush" Color="#252631" />
+        <SolidColorBrush x:Key="GlassBrush" Color="#33FFFFFF" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B8BCC8" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#00D4FF" />
+        <SolidColorBrush x:Key="AccentGradientBrush" Color="#6366F1" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#10B981" />
+        <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B" />
+        <SolidColorBrush x:Key="ErrorBrush" Color="#EF4444" />
 
-        <!-- Single Circle Animation -->
+        <!-- Gradients -->
+        <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#6366F1" Offset="0"/>
+            <GradientStop Color="#00D4FF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="BackgroundGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#1A1B23" Offset="0"/>
+            <GradientStop Color="#252631" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Advanced Animations -->
         <Storyboard x:Key="SpinnerAnimation" RepeatBehavior="Forever">
-            <!-- Single circle rotation -->
+            <!-- Primary ring rotation -->
             <DoubleAnimation
-                Storyboard.TargetName="SpinnerRotation"
+                Storyboard.TargetName="PrimaryRingRotation"
                 Storyboard.TargetProperty="Angle"
                 From="0"
                 To="360"
-                Duration="0:0:2" />
+                Duration="0:0:3" />
 
-            <!-- GO text pulse animation -->
+            <!-- Secondary ring counter-rotation -->
             <DoubleAnimation
-                Storyboard.TargetName="GoTextScale"
+                Storyboard.TargetName="SecondaryRingRotation"
+                Storyboard.TargetProperty="Angle"
+                From="360"
+                To="0"
+                Duration="0:0:4" />
+
+            <!-- Pulse animation for center -->
+            <DoubleAnimation
+                Storyboard.TargetName="CenterPulse"
                 Storyboard.TargetProperty="ScaleX"
                 From="1"
-                To="1.05"
-                Duration="0:0:1.5"
+                To="1.1"
+                Duration="0:0:2"
                 AutoReverse="True"
                 RepeatBehavior="Forever" />
             <DoubleAnimation
-                Storyboard.TargetName="GoTextScale"
+                Storyboard.TargetName="CenterPulse"
                 Storyboard.TargetProperty="ScaleY"
                 From="1"
-                To="1.05"
+                To="1.1"
+                Duration="0:0:2"
+                AutoReverse="True"
+                RepeatBehavior="Forever" />
+
+            <!-- Floating animation for speed text -->
+            <DoubleAnimation
+                Storyboard.TargetName="SpeedTextTransform"
+                Storyboard.TargetProperty="Y"
+                From="0"
+                To="-3"
                 Duration="0:0:1.5"
                 AutoReverse="True"
                 RepeatBehavior="Forever" />
         </Storyboard>
 
-        <!-- Step indicator styles -->
-        <Style x:Key="StepIndicator" TargetType="Ellipse">
-            <Setter Property="Width" Value="8"/>
-            <Setter Property="Height" Value="8"/>
-            <Setter Property="Margin" Value="6,0"/>
-            <Setter Property="Fill" Value="#2C2E3B"/>
-            <Setter Property="Stroke" Value="#3D3F4E"/>
-            <Setter Property="StrokeThickness" Value="1"/>
+        <!-- Step Progress Animation -->
+        <Storyboard x:Key="StepCompleteAnimation">
+            <DoubleAnimation
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                From="1"
+                To="1.2"
+                Duration="0:0:0.2"
+                AutoReverse="True" />
+            <DoubleAnimation
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                From="1"
+                To="1.2"
+                Duration="0:0:0.2"
+                AutoReverse="True" />
+        </Storyboard>
+
+        <!-- Step indicator styles with modern design -->
+        <Style x:Key="StepIndicator" TargetType="Border">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="Background" Value="#2A2B35"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="BorderBrush" Value="#3A3B45"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
         </Style>
 
-        <Style x:Key="ActiveStepIndicator" TargetType="Ellipse" BasedOn="{StaticResource StepIndicator}">
-            <Setter Property="Fill" Value="#4DABF7"/>
-            <Setter Property="Stroke" Value="#339AF0"/>
+        <Style x:Key="ActiveStepIndicator" TargetType="Border" BasedOn="{StaticResource StepIndicator}">
+            <Setter Property="Background" Value="{StaticResource PrimaryGradient}"/>
+            <Setter Property="BorderBrush" Value="#00D4FF"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#00D4FF" Opacity="0.6"/>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <Style x:Key="CompletedStepIndicator" TargetType="Ellipse" BasedOn="{StaticResource StepIndicator}">
-            <Setter Property="Fill" Value="#40C057"/>
-            <Setter Property="Stroke" Value="#37B24D"/>
+        <Style x:Key="CompletedStepIndicator" TargetType="Border" BasedOn="{StaticResource StepIndicator}">
+            <Setter Property="Background" Value="#10B981"/>
+            <Setter Property="BorderBrush" Value="#059669"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="6" ShadowDepth="0" Color="#10B981" Opacity="0.4"/>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <Style x:Key="ErrorStepIndicator" TargetType="Ellipse" BasedOn="{StaticResource StepIndicator}">
-            <Setter Property="Fill" Value="#FA5252"/>
-            <Setter Property="Stroke" Value="#F03E3E"/>
+        <Style x:Key="ErrorStepIndicator" TargetType="Border" BasedOn="{StaticResource StepIndicator}">
+            <Setter Property="Background" Value="#EF4444"/>
+            <Setter Property="BorderBrush" Value="#DC2626"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="6" ShadowDepth="0" Color="#EF4444" Opacity="0.4"/>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
@@ -84,139 +155,261 @@
         </EventTrigger>
     </Window.Triggers>
 
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <!-- Main container with glassmorphism effect -->
+    <Border CornerRadius="16" Background="{StaticResource BackgroundGradient}">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" ShadowDepth="0" Color="Black" Opacity="0.3"/>
+        </Border.Effect>
 
-        <!-- Title -->
-        <TextBlock Grid.Row="0"
-                   Text="Running Speed Test"
-                   FontSize="28"
-                   FontWeight="SemiBold"
-                   HorizontalAlignment="Center"
-                   Foreground="{StaticResource TextBrush}"
-                   Margin="0,0,0,24"/>
+        <Grid Margin="32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <!-- Simple Central GO button with single circle -->
-        <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,20">
-            <!-- Dark background circle -->
-            <Ellipse Width="200" Height="200" Fill="#1A1D28" Stroke="#2C2E3B" StrokeThickness="2"/>
+            <!-- Title with gradient text effect -->
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,32">
+                <TextBlock Text="Speed Test"
+                           FontSize="32"
+                           FontWeight="Light"
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Margin="0,0,0,4">
+                    <TextBlock.Effect>
+                        <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#6366F1" Opacity="0.3"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+                <TextBlock Text="IN PROGRESS"
+                           FontSize="14"
+                           FontWeight="Medium"
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource AccentBrush}"
+                           Opacity="0.8"/>
+            </StackPanel>
 
-            <!-- Single spinning circle -->
-            <Canvas Width="200" Height="200">
-                <Grid>
-                    <Grid.RenderTransform>
-                        <RotateTransform x:Name="SpinnerRotation" CenterX="100" CenterY="100"/>
-                    </Grid.RenderTransform>
-                    <Ellipse Width="200"
-                             Height="200"
-                             Stroke="#4DABF7"
-                             StrokeThickness="4"
-                             StrokeDashArray="150 100"
-                             Fill="Transparent">
-                        <Ellipse.Effect>
-                            <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#4DABF7" Opacity="0.6"/>
-                        </Ellipse.Effect>
-                    </Ellipse>
-                </Grid>
-            </Canvas>
+            <!-- Advanced circular progress indicator -->
+            <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,32">
+                <!-- Glassmorphic background -->
+                <Border Width="280" Height="280" 
+                        CornerRadius="140" 
+                        Background="#1A252631" 
+                        BorderBrush="#33FFFFFF" 
+                        BorderThickness="1">
+                    <Border.Effect>
+                        <BlurEffect Radius="1"/>
+                    </Border.Effect>
+                </Border>
 
-            <!-- GO text -->
-            <TextBlock Text="GO"
-                       FontSize="48"
-                       FontWeight="Bold"
-                       Foreground="{StaticResource TextBrush}"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center">
-                <TextBlock.Effect>
-                    <DropShadowEffect BlurRadius="6" ShadowDepth="0" Color="#4DABF7" Opacity="0.5"/>
-                </TextBlock.Effect>
-                <TextBlock.RenderTransform>
-                    <ScaleTransform x:Name="GoTextScale" CenterX="24" CenterY="24"/>
-                </TextBlock.RenderTransform>
-            </TextBlock>
+                <!-- Outer decorative rings -->
+                <Canvas Width="280" Height="280">
+                    <!-- Primary ring -->
+                    <Grid>
+                        <Grid.RenderTransform>
+                            <RotateTransform x:Name="PrimaryRingRotation" CenterX="140" CenterY="140"/>
+                        </Grid.RenderTransform>
+                        <Ellipse Width="280" Height="280"
+                                 Stroke="{StaticResource PrimaryGradient}"
+                                 StrokeThickness="3"
+                                 StrokeDashArray="200 100"
+                                 Fill="Transparent">
+                            <Ellipse.Effect>
+                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#6366F1" Opacity="0.4"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+                    </Grid>
 
-            <!-- Current speed text -->
-            <TextBlock x:Name="CurrentSpeedText"
-                       Text=""
-                       FontSize="14"
-                       Foreground="{StaticResource TextBrush}"
-                       Opacity="0.9"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Bottom"
-                       Margin="0,0,0,20">
-                <TextBlock.Effect>
-                    <DropShadowEffect BlurRadius="3" ShadowDepth="0" Color="#4DABF7" Opacity="0.5"/>
-                </TextBlock.Effect>
-            </TextBlock>
-        </Grid>
+                    <!-- Secondary ring -->
+                    <Grid>
+                        <Grid.RenderTransform>
+                            <RotateTransform x:Name="SecondaryRingRotation" CenterX="140" CenterY="140"/>
+                        </Grid.RenderTransform>
+                        <Ellipse Width="240" Height="240"
+                                 Canvas.Left="20" Canvas.Top="20"
+                                 Stroke="#00D4FF"
+                                 StrokeThickness="2"
+                                 StrokeDashArray="80 120"
+                                 Fill="Transparent"
+                                 Opacity="0.6">
+                            <Ellipse.Effect>
+                                <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#00D4FF" Opacity="0.3"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+                    </Grid>
+                </Canvas>
 
-        <!-- Step indicators -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
-            <Ellipse x:Name="Step1Indicator" Style="{StaticResource StepIndicator}"/>
-            <Ellipse x:Name="Step2Indicator" Style="{StaticResource StepIndicator}"/>
-            <Ellipse x:Name="Step3Indicator" Style="{StaticResource StepIndicator}"/>
-            <Ellipse x:Name="Step4Indicator" Style="{StaticResource StepIndicator}"/>
-        </StackPanel>
+                <!-- Center content with pulse animation -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel.RenderTransform>
+                        <ScaleTransform x:Name="CenterPulse"/>
+                    </StackPanel.RenderTransform>
 
-        <!-- CLI Output Box -->
-        <Border Grid.Row="3"
-                BorderBrush="#2C2E3B"
-                BorderThickness="1"
-                CornerRadius="8"
-                Margin="0,0,0,20"
-                Background="#1A1D28">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="Black" Opacity="0.2"/>
-            </Border.Effect>
-            <ScrollViewer x:Name="OutputScrollViewer"
-                         VerticalScrollBarVisibility="Auto"
-                         HorizontalScrollBarVisibility="Auto"
-                         Padding="12">
-                <TextBlock x:Name="CLIOutputText"
-                           TextWrapping="NoWrap"
-                           FontFamily="Consolas"
-                           FontSize="12"
-                           Foreground="#40C057"
-                           Margin="0"/>
-            </ScrollViewer>
-        </Border>
+                    <!-- Speed display -->
+                    <TextBlock x:Name="CurrentSpeedText"
+                               Text=""
+                               FontSize="28"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,8">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform x:Name="SpeedTextTransform"/>
+                        </TextBlock.RenderTransform>
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#00D4FF" Opacity="0.6"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
 
-        <!-- Status and details -->
-        <StackPanel Grid.Row="4" Margin="0,0,0,0">
-            <!-- Status -->
-            <TextBlock x:Name="StatusText"
-                       Text="Connecting to server..."
-                       HorizontalAlignment="Center"
-                       FontSize="16"
-                       FontWeight="Medium"
-                       Foreground="{StaticResource TextBrush}"
-                       Margin="0,0,0,6">
-                <TextBlock.Effect>
-                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#4DABF7" Opacity="0.4"/>
-                </TextBlock.Effect>
-            </TextBlock>
+                    <!-- Status text -->
+                    <TextBlock x:Name="StatusText"
+                               Text="Connecting..."
+                               FontSize="16"
+                               FontWeight="Medium"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,4"/>
 
-            <!-- Detail text / Latency -->
-            <TextBlock x:Name="DetailText"
+                    <!-- Server info -->
+                    <TextBlock x:Name="ServerNameText"
+                               Text=""
+                               FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"
+                               Opacity="0.8"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Enhanced step indicators with labels -->
+            <Grid Grid.Row="2" Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Step 1: Connect -->
+                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                    <Border x:Name="Step1Indicator" Style="{StaticResource StepIndicator}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Connect" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" 
+                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                </StackPanel>
+
+                <!-- Step 2: Latency -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <Border x:Name="Step2Indicator" Style="{StaticResource StepIndicator}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Latency" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" 
+                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                </StackPanel>
+
+                <!-- Step 3: Download -->
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                    <Border x:Name="Step3Indicator" Style="{StaticResource StepIndicator}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Download" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" 
+                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                </StackPanel>
+
+                <!-- Step 4: Upload -->
+                <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                    <Border x:Name="Step4Indicator" Style="{StaticResource StepIndicator}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Upload" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" 
+                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                </StackPanel>
+
+                <!-- Progress line background -->
+                <Rectangle Grid.ColumnSpan="4" Height="2" Fill="#2A2B35" 
+                          VerticalAlignment="Center" Margin="32,0" RadiusX="1" RadiusY="1"/>
+
+                <!-- Animated progress line -->
+                <Rectangle x:Name="ProgressLine" Grid.ColumnSpan="4" Height="2" 
+                          Fill="{StaticResource PrimaryGradient}" 
+                          VerticalAlignment="Center" Margin="32,0" 
+                          RadiusX="1" RadiusY="1"
+                          HorizontalAlignment="Left" Width="0">
+                    <Rectangle.Effect>
+                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#00D4FF" Opacity="0.6"/>
+                    </Rectangle.Effect>
+                </Rectangle>
+            </Grid>
+
+            <!-- Detail text with better typography -->
+            <TextBlock Grid.Row="3" x:Name="DetailText"
                        Text="Initializing speed test..."
                        HorizontalAlignment="Center"
                        FontSize="14"
-                       Foreground="#4DABF7"
-                       Opacity="0.9"
-                       Margin="0,0,0,0"/>
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       Margin="0,0,0,20"/>
 
-            <TextBlock x:Name="ServerNameText"
-                       Text=""
-                       HorizontalAlignment="Center"
-                       FontSize="12"
-                       Foreground="#40C057"
-                       Margin="0,6,0,0"/>
-        </StackPanel>
-    </Grid>
+            <!-- Enhanced CLI Output with glassmorphic design -->
+            <Border Grid.Row="4"
+                    CornerRadius="12"
+                    Margin="0,0,0,24"
+                    Background="#1A252631"
+                    BorderBrush="#33FFFFFF"
+                    BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="Black" Opacity="0.2"/>
+                </Border.Effect>
+
+                <Grid>
+                    <!-- Header -->
+                    <Border VerticalAlignment="Top" Height="40" 
+                            Background="#1A6366F1" 
+                            CornerRadius="12,12,0,0"
+                            BorderBrush="#4D6366F1"
+                            BorderThickness="0,0,0,1">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
+                            <Ellipse Width="8" Height="8" Fill="#EF4444" Margin="0,0,6,0"/>
+                            <Ellipse Width="8" Height="8" Fill="#F59E0B" Margin="0,0,6,0"/>
+                            <Ellipse Width="8" Height="8" Fill="#10B981" Margin="0,0,12,0"/>
+                            <TextBlock Text="Terminal Output" FontSize="12" 
+                                      Foreground="{StaticResource TextSecondaryBrush}" 
+                                      VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Content -->
+                    <ScrollViewer x:Name="OutputScrollViewer"
+                                 VerticalScrollBarVisibility="Auto"
+                                 HorizontalScrollBarVisibility="Auto"
+                                 Padding="16"
+                                 Margin="0,40,0,0">
+                        <TextBlock x:Name="CLIOutputText"
+                                   TextWrapping="NoWrap"
+                                   FontFamily="JetBrains Mono, Consolas, Courier New"
+                                   FontSize="11"
+                                   Foreground="#22C55E"
+                                   LineHeight="18"
+                                   Background="Transparent"/>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Enhanced completion section -->
+            <StackPanel Grid.Row="5" x:Name="CompletionSection" Visibility="Collapsed">
+                <Border Background="#1A10B981" CornerRadius="8" Padding="16" Margin="0,0,0,8">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#10B981" Opacity="0.3"/>
+                    </Border.Effect>
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock x:Name="CompletionTitleText"
+                                   Text="✨ Test Complete!"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <TextBlock x:Name="CompletionSubtitleText"
+                                   Text="Your internet speed has been measured successfully"
+                                   FontSize="12"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>

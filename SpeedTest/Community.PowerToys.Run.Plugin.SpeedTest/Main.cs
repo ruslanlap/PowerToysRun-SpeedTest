@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls; 
 using Wox.Plugin;
+using System.Linq;
 
 namespace Community.PowerToys.Run.Plugin.SpeedTest
 {
@@ -21,23 +22,35 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
     {
         public static string PluginID => "5A0F7ED1D3F24B0A900732839D0E43DB";
         public string Name => "SpeedTest";
-        public string Description => "Run internet speed tests (Ookla Speedtest CLI) and view results.";
+        public string Description => "Run internet speed tests with beautiful UI and real-time feedback.";
 
         private PluginInitContext _context;
         private bool _isRunningTest;
         private readonly string _cliPath;
         private string _iconPath;
         private CancellationTokenSource _cancellationTokenSource;
-        
-        // Settings
-        private bool _copyToClipboard = false; // Default: do not copy to clipboard
+        private LoadingWindow _currentLoadingWindow;
 
-        // Regexes to attempt to determine current test stage from stderr.
+        // Settings
+        private bool _copyToClipboard = false;
+        private bool _showNotifications = true;
+        private bool _saveHistory = true;
+        private string _preferredServer = "";
+
+        // Enhanced progress tracking
+        private double _currentDownloadSpeed = 0;
+        private double _currentUploadSpeed = 0;
+        private double _currentLatency = 0;
+        private string _currentServerName = "";
+        private DateTime _testStartTime;
+
+        // Regexes for parsing CLI output
         private static readonly Regex ServerRegex = new Regex(@"(Server:|Hosted by)\s*(?<serverName>[^\(]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex LatencyProgressRegex = new Regex(@"(Ping|Latency):", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex DownloadProgressRegex = new Regex(@"Download:", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex UploadProgressRegex = new Regex(@"Upload:", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex LatencyRegex = new Regex(@"(Ping|Latency):?\s*(?<latency>\d+[\.,]?\d*)\s*ms", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex DownloadRegex = new Regex(@"Download:?\s*(?<speed>\d+[\.,]?\d*)\s*Mbps", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex UploadRegex = new Regex(@"Upload:?\s*(?<speed>\d+[\.,]?\d*)\s*Mbps", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex ConnectingRegex = new Regex(@"(Connecting to|Selecting server|Testing from)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex TestingRegex = new Regex(@"Testing (download|upload)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public Main()
         {
@@ -51,8 +64,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _context.API.ThemeChanged += OnThemeChanged;
             UpdateIconPath(_context.API.GetCurrentTheme());
-            
-            // Load settings
+
             LoadSettings();
         }
 
@@ -65,28 +77,35 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 {
                     var settingsJson = File.ReadAllText(settingsPath);
                     var settings = JsonSerializer.Deserialize<Dictionary<string, object>>(settingsJson);
+
                     if (settings.ContainsKey("CopyToClipboard"))
-                    {
                         _copyToClipboard = Convert.ToBoolean(settings["CopyToClipboard"]);
-                    }
+                    if (settings.ContainsKey("ShowNotifications"))
+                        _showNotifications = Convert.ToBoolean(settings["ShowNotifications"]);
+                    if (settings.ContainsKey("SaveHistory"))
+                        _saveHistory = Convert.ToBoolean(settings["SaveHistory"]);
+                    if (settings.ContainsKey("PreferredServer"))
+                        _preferredServer = settings["PreferredServer"].ToString();
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Failed to load settings: {ex.Message}");
-                // Use default values if loading fails
             }
         }
-        
+
         private void SaveSettings()
         {
             try
             {
                 var settings = new Dictionary<string, object>
                 {
-                    ["CopyToClipboard"] = _copyToClipboard
+                    ["CopyToClipboard"] = _copyToClipboard,
+                    ["ShowNotifications"] = _showNotifications,
+                    ["SaveHistory"] = _saveHistory,
+                    ["PreferredServer"] = _preferredServer
                 };
-                
+
                 var settingsJson = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
                 var settingsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "settings.json");
                 File.WriteAllText(settingsPath, settingsJson);
@@ -106,18 +125,26 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             {
                 results.Add(new Result
                 {
-                    Title = "Speed test is currently running...",
-                    SubTitle = "Please wait. Type 'spt cancel' to attempt to stop.",
+                    Title = "🚀 Speed test in progress...",
+                    SubTitle = $"Current: {GetCurrentTestInfo()} • Type 'cancel' to stop",
                     IcoPath = _iconPath,
                     Score = 100,
-                    Action = _ => false
+                    Action = _ => 
+                    {
+                        if (_currentLoadingWindow != null)
+                        {
+                            _currentLoadingWindow.Activate();
+                        }
+                        return false;
+                    }
                 });
-                if (trimmedQuery == "cancel" || "spt cancel".Contains(trimmedQuery))
+
+                if (trimmedQuery.Contains("cancel") || trimmedQuery.Contains("stop"))
                 {
                     results.Add(new Result
                     {
-                        Title = "Cancel Speed Test",
-                        SubTitle = "Stops the current speed test.",
+                        Title = "❌ Cancel Speed Test",
+                        SubTitle = "Stop the currently running speed test",
                         IcoPath = _iconPath,
                         Score = 110,
                         Action = _ =>
@@ -130,10 +157,11 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             }
             else
             {
+                // Main speed test option
                 results.Add(new Result
                 {
-                    Title = "Run Speed Test",
-                    SubTitle = "Test your internet connection speed (using Ookla Speedtest CLI)",
+                    Title = "🚀 Run Speed Test",
+                    SubTitle = "Test your internet connection speed with beautiful real-time UI",
                     IcoPath = _iconPath,
                     Score = 100,
                     Action = _ =>
@@ -142,8 +170,59 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                         return true;
                     }
                 });
+
+                // Quick test option
+                if (string.IsNullOrEmpty(trimmedQuery) || "quick".Contains(trimmedQuery))
+                {
+                    results.Add(new Result
+                    {
+                        Title = "⚡ Quick Speed Test",
+                        SubTitle = "Run a faster speed test with minimal UI",
+                        IcoPath = _iconPath,
+                        Score = 90,
+                        Action = _ =>
+                        {
+                            Task.Run(async () => await RunQuickSpeedTestAsync());
+                            return true;
+                        }
+                    });
+                }
+
+                // History option (if enabled)
+                if (_saveHistory && (string.IsNullOrEmpty(trimmedQuery) || "history".Contains(trimmedQuery)))
+                {
+                    results.Add(new Result
+                    {
+                        Title = "📊 View Test History",
+                        SubTitle = "View your previous speed test results",
+                        IcoPath = _iconPath,
+                        Score = 80,
+                        Action = _ =>
+                        {
+                            ShowTestHistory();
+                            return true;
+                        }
+                    });
+                }
             }
+
             return results;
+        }
+
+        private string GetCurrentTestInfo()
+        {
+            var info = new List<string>();
+
+            if (_currentDownloadSpeed > 0)
+                info.Add($"↓ {_currentDownloadSpeed:F1} Mbps");
+            if (_currentUploadSpeed > 0)
+                info.Add($"↑ {_currentUploadSpeed:F1} Mbps");
+            if (_currentLatency > 0)
+                info.Add($"{_currentLatency:F0}ms");
+            if (!string.IsNullOrEmpty(_currentServerName))
+                info.Add(_currentServerName);
+
+            return info.Count > 0 ? string.Join(" • ", info) : "Initializing...";
         }
 
         private void CancelSpeedTest(bool showNotifications = true)
@@ -153,9 +232,9 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 try
                 {
                     _cancellationTokenSource.Cancel();
-                    if (showNotifications)
+                    if (showNotifications && _showNotifications)
                     {
-                        _context?.API?.ShowMsg("Speed Test", "Cancellation requested for the speed test.", _iconPath);
+                        _context?.API?.ShowMsg("Speed Test", "🛑 Speed test canceled", _iconPath);
                     }
                 }
                 catch (ObjectDisposedException)
@@ -163,9 +242,9 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     // Ignore if already disposed
                 }
             }
-            else if (!_isRunningTest && showNotifications)
+            else if (!_isRunningTest && showNotifications && _showNotifications)
             {
-                _context?.API?.ShowMsg("Speed Test", "No speed test is currently running.", _iconPath);
+                _context?.API?.ShowMsg("Speed Test", "ℹ️ No speed test is currently running", _iconPath);
             }
         }
 
@@ -178,17 +257,74 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 
         private void OnThemeChanged(Theme _, Theme newTheme) => UpdateIconPath(newTheme);
 
-        private async Task RunSpeedTestAsync()
+        private async Task RunQuickSpeedTestAsync()
         {
+            // Quick test with minimal UI - just show notification
             if (!File.Exists(_cliPath) && !IsSpeedtestInPath())
             {
-                _context.API.ShowMsg("Speed Test Error", $"Speedtest CLI not found at '{_cliPath}' or in PATH.", _iconPath);
+                _context.API.ShowMsg("Speed Test Error", "❌ Speedtest CLI not found", _iconPath);
                 return;
             }
 
             if (_isRunningTest) return;
 
             _isRunningTest = true;
+            _testStartTime = DateTime.Now;
+
+            try
+            {
+                if (_showNotifications)
+                {
+                    _context.API.ShowMsg("Speed Test", "🚀 Quick test started...", _iconPath);
+                }
+
+                var result = await ExecuteSpeedTestCLI(showUI: false);
+
+                if (result != null)
+                {
+                    var duration = DateTime.Now - _testStartTime;
+                    var message = $"⬇️ {result.Download?.Bandwidth / 125000:F1} Mbps ⬆️ {result.Upload?.Bandwidth / 125000:F1} Mbps 📍 {result.Ping?.Latency:F0}ms ({duration.TotalSeconds:F0}s)";
+
+                    if (_showNotifications)
+                    {
+                        _context.API.ShowMsg("Speed Test Complete", message, _iconPath);
+                    }
+
+                    if (_copyToClipboard)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            Clipboard.SetText(result.ToString());
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_showNotifications)
+                {
+                    _context.API.ShowMsg("Speed Test Error", $"❌ Test failed: {ex.Message}", _iconPath);
+                }
+            }
+            finally
+            {
+                _isRunningTest = false;
+                ResetCurrentValues();
+            }
+        }
+
+        private async Task RunSpeedTestAsync()
+        {
+            if (!File.Exists(_cliPath) && !IsSpeedtestInPath())
+            {
+                _context.API.ShowMsg("Speed Test Error", "❌ Speedtest CLI not found. Please install Speedtest CLI or place speedtest.exe in the plugin directory.", _iconPath);
+                return;
+            }
+
+            if (_isRunningTest) return;
+
+            _isRunningTest = true;
+            _testStartTime = DateTime.Now;
             _cancellationTokenSource = new CancellationTokenSource();
             var token = _cancellationTokenSource.Token;
 
@@ -198,210 +334,303 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             Application.Current.Dispatcher.Invoke(() =>
             {
                 loadingWindow = new LoadingWindow();
+                _currentLoadingWindow = loadingWindow;
                 loadingWindow.Show();
                 loadingWindow.UpdateStage(LoadingWindow.TestStage.Connecting);
                 loadingWindow.UpdateDetail("Initializing speed test...");
+                loadingWindow.UpdateCLIOutput("🚀 Starting Speedtest CLI...\n");
             });
-
-            var cliJsonOutput = new StringBuilder();
-            var cliStdErrAggregator = new StringBuilder();
 
             try
             {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = File.Exists(_cliPath) ? _cliPath : "speedtest",
-                    Arguments = "--accept-license --accept-gdpr --format=json",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    StandardOutputEncoding = Encoding.UTF8,
-                    StandardErrorEncoding = Encoding.UTF8
-                };
-
-                using var process = new Process { StartInfo = psi };
-
-                process.OutputDataReceived += (sender, e) =>
-                {
-                    if (e.Data != null)
-                    {
-                        cliJsonOutput.AppendLine(e.Data);
-                    }
-                };
-
-                process.ErrorDataReceived += (sender, e) =>
-                {
-                    if (e.Data != null)
-                    {
-                        string line = e.Data;
-                        cliStdErrAggregator.AppendLine(line);
-
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            loadingWindow?.UpdateCLIOutput(cliStdErrAggregator.ToString());
-
-                            if (line.Contains("Download", StringComparison.OrdinalIgnoreCase) && 
-                                !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
-                            {
-                                var match = Regex.Match(line, @"Download:?\s*(\d+[\.,]?\d*)\s*Mbps", RegexOptions.IgnoreCase);
-                                if (match.Success)
-                                {
-                                    loadingWindow?.UpdateCurrentSpeed($"{match.Groups[1].Value} Mbps ↓");
-                                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Download);
-                                    loadingWindow?.UpdateDetail("Testing download speed...");
-                                }
-                            }
-                            else if (line.Contains("Upload", StringComparison.OrdinalIgnoreCase) && 
-                                     !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
-                            {
-                                var match = Regex.Match(line, @"Upload:?\s*(\d+[\.,]?\d*)\s*Mbps", RegexOptions.IgnoreCase);
-                                if (match.Success)
-                                {
-                                    loadingWindow?.UpdateCurrentSpeed($"{match.Groups[1].Value} Mbps ↑");
-                                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Upload);
-                                    loadingWindow?.UpdateDetail("Testing upload speed...");
-                                }
-                            }
-                            else if (line.Contains("Ping", StringComparison.OrdinalIgnoreCase) || 
-                                     line.Contains("Latency", StringComparison.OrdinalIgnoreCase))
-                            {
-                                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Latency);
-                                loadingWindow?.UpdateDetail("Testing latency...");
-                            }
-                            else if (ConnectingRegex.IsMatch(line) || 
-                                     line.Contains("Selecting server", StringComparison.OrdinalIgnoreCase))
-                            {
-                                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Connecting);
-                                loadingWindow?.UpdateDetail("Connecting to server...");
-
-                                var serverMatch = ServerRegex.Match(line);
-                                if (serverMatch.Success)
-                                {
-                                    loadingWindow?.UpdateServerInfo(serverMatch.Groups["serverName"].Value.Trim());
-                                }
-                            }
-                            else if (line.Contains("Results", StringComparison.OrdinalIgnoreCase) || 
-                                     line.Contains("URL", StringComparison.OrdinalIgnoreCase))
-                            {
-                                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Complete);
-                                loadingWindow?.UpdateDetail("Test complete!");
-                            }
-                        });
-                    }
-                };
-
-                process.Start();
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                await process.WaitForExitAsync(token);
+                var result = await ExecuteSpeedTestCLI(showUI: true, loadingWindow, token);
 
                 if (token.IsCancellationRequested)
                 {
-                    Application.Current.Dispatcher.Invoke(() => loadingWindow?.Close());
-                    _context.API.ShowMsg("Speed Test Canceled", "The speed test was canceled by the user.", _iconPath);
+                    Application.Current.Dispatcher.Invoke(() => loadingWindow?.CloseWithAnimation());
+                    if (_showNotifications)
+                    {
+                        _context.API.ShowMsg("Speed Test", "🛑 Test was canceled", _iconPath);
+                    }
                     return;
                 }
 
-                Application.Current.Dispatcher.Invoke(() =>
+                if (result != null)
                 {
-                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Complete);
-                    loadingWindow?.UpdateDetail("Test finished. Processing results...");
-                });
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        loadingWindow?.CloseWithAnimation();
+
+                        try
+                        {
+                            if (_copyToClipboard)
+                            {
+                                Clipboard.SetText(result.ToString());
+                            }
+
+                            if (_saveHistory)
+                            {
+                                SaveTestResult(result);
+                            }
+
+                            var resultsWindow = new ResultsWindow(result);
+                            resultsWindow.ShowDialog();
+                        }
+                        catch (Exception ex)
+                        {
+                            _context.API.ShowMsg("UI Error", $"❌ Error displaying results: {ex.Message}", _iconPath);
+                            Debug.WriteLine($"ResultsWindow display error: {ex}");
+                        }
+                    });
+                }
             }
             catch (OperationCanceledException)
             {
-                Application.Current.Dispatcher.Invoke(() => loadingWindow?.Close());
-                _context.API.ShowMsg("Speed Test Canceled", "The speed test operation was canceled.", _iconPath);
-                return;
+                Application.Current.Dispatcher.Invoke(() => loadingWindow?.CloseWithAnimation());
+                if (_showNotifications)
+                {
+                    _context.API.ShowMsg("Speed Test", "🛑 Test was canceled", _iconPath);
+                }
             }
             catch (Exception ex)
             {
-                Application.Current.Dispatcher.Invoke(() => loadingWindow?.Close());
-                _context.API.ShowMsg("Speed Test Error", $"Error during speed test execution: {ex.Message}\nStderr: {cliStdErrAggregator}", _iconPath);
-                return;
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    loadingWindow?.ShowError(ex.Message);
+
+                    var timer = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromSeconds(3)
+                    };
+                    timer.Tick += (s, e) =>
+                    {
+                        timer.Stop();
+                        loadingWindow?.CloseWithAnimation();
+                    };
+                    timer.Start();
+                });
+
+                if (_showNotifications)
+                {
+                    _context.API.ShowMsg("Speed Test Error", $"❌ {ex.Message}", _iconPath);
+                }
             }
             finally
             {
                 _isRunningTest = false;
+                _currentLoadingWindow = null;
+                ResetCurrentValues();
                 _cancellationTokenSource?.Dispose();
                 _cancellationTokenSource = null;
                 Application.Current.Dispatcher.Invoke(() => _context.API.ChangeQuery("spt "));
             }
+        }
 
-            Application.Current.Dispatcher.Invoke(() => loadingWindow?.Close());
+        private async Task<SpeedTestResult> ExecuteSpeedTestCLI(bool showUI = true, LoadingWindow loadingWindow = null, CancellationToken token = default)
+        {
+            var cliJsonOutput = new StringBuilder();
+            var cliStdErrAggregator = new StringBuilder();
+            var cliAllOutput = new StringBuilder();
 
-            SpeedTestResult resultData = null;
-            string finalJsonOutput = cliJsonOutput.ToString();
+            string speedtestExe = File.Exists(_cliPath) ? _cliPath : "speedtest";
+            var arguments = "--accept-license --accept-gdpr --format=json";
 
-            if (string.IsNullOrWhiteSpace(finalJsonOutput))
+            if (!string.IsNullOrEmpty(_preferredServer))
             {
-                _context.API.ShowMsg("Speed Test Error", "Speedtest CLI returned no output (empty JSON)." +
-                                     (cliStdErrAggregator.Length > 0 ? $"\nStandard Error Output:\n{cliStdErrAggregator}" : ""), _iconPath);
-                return;
+                arguments += $" --server-id={_preferredServer}";
             }
 
-            try
+            var psi = new ProcessStartInfo
             {
-                resultData = ParseJsonOutput(finalJsonOutput);
-                if (resultData == null)
+                FileName = speedtestExe,
+                Arguments = arguments,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8
+            };
+
+            using var process = new Process { StartInfo = psi };
+
+            process.OutputDataReceived += (sender, e) =>
+            {
+                if (e.Data != null)
                 {
-                    throw new InvalidDataException("Failed to parse JSON output (ParseJsonOutput returned null)." +
-                                                  (cliStdErrAggregator.Length > 0 ? $"\nStandard Error Output:\n{cliStdErrAggregator}" : ""));
-                }
-            }
-            catch (Exception ex)
-            {
-                _context.API.ShowMsg("Result Parsing Error", $"Failed to process speed test results: {ex.Message}\nRaw JSON (first 500 chars): {finalJsonOutput.Substring(0, Math.Min(500, finalJsonOutput.Length))}", _iconPath);
-                #if DEBUG
-                string fullErrorMsg = $"Failed to parse results: {ex.Message}\n\nRaw JSON:\n{finalJsonOutput}\n\nStderr:\n{cliStdErrAggregator}";
-                Application.Current.Dispatcher.Invoke(() =>
-                    MessageBox.Show(fullErrorMsg, "Detailed JSON Parse Error (DEBUG)", MessageBoxButton.OK, MessageBoxImage.Error)
-                );
-                #endif
-                return;
-            }
+                    cliJsonOutput.AppendLine(e.Data);
 
-            if (resultData != null)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    try
+                    if (!e.Data.Trim().StartsWith("{") && !e.Data.Trim().StartsWith("}") && 
+                        !string.IsNullOrWhiteSpace(e.Data.Trim()))
                     {
-                        if (_copyToClipboard)
+                        cliAllOutput.AppendLine($"[INFO] {e.Data}");
+                        if (showUI)
                         {
-                            Clipboard.SetText(resultData.ToString());
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
+                            });
                         }
+                    }
+                }
+            };
 
-                        var resultsWindow = new ResultsWindow(resultData);
-                        resultsWindow.ShowDialog();
-                    }
-                    catch (Exception ex)
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data != null)
+                {
+                    string line = e.Data;
+                    cliStdErrAggregator.AppendLine(line);
+                    cliAllOutput.AppendLine($"[STDERR] {line}");
+
+                    if (showUI)
                     {
-                        _context.API.ShowMsg("UI Error", $"Error displaying results window: {ex.Message}", _iconPath);
-                        Debug.WriteLine($"ResultsWindow display or Clipboard error: {ex}");
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
+                            ParseAndUpdateProgress(line, loadingWindow);
+                        });
                     }
+                    else
+                    {
+                        ParseProgressValues(line);
+                    }
+                }
+            };
+
+            if (showUI)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    cliAllOutput.AppendLine($"🔧 Executing: {psi.FileName} {psi.Arguments}");
+                    cliAllOutput.AppendLine("⏳ Waiting for CLI response...");
+                    loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
                 });
             }
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            await process.WaitForExitAsync(token);
+
+            if (token.IsCancellationRequested)
+            {
+                return null;
+            }
+
+            if (showUI)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Complete);
+                    loadingWindow?.UpdateDetail("✅ Test finished. Processing results...");
+                });
+            }
+
+            return ParseJsonOutput(cliJsonOutput.ToString(), cliStdErrAggregator.ToString());
+        }
+
+        private void ParseAndUpdateProgress(string line, LoadingWindow loadingWindow)
+        {
+            ParseProgressValues(line);
+
+            if (DownloadRegex.IsMatch(line) && !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
+            {
+                var match = DownloadRegex.Match(line);
+                if (match.Success)
+                {
+                    var speedText = $"{_currentDownloadSpeed:F1} Mbps ⬇️";
+                    loadingWindow?.UpdateCurrentSpeed(speedText);
+                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Download);
+                    loadingWindow?.UpdateDetail("📥 Testing download speed...");
+                    Debug.WriteLine($"Stage updated to Download: {speedText}");
+                }
+            }
+            else if (UploadRegex.IsMatch(line) && !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
+            {
+                var match = UploadRegex.Match(line);
+                if (match.Success)
+                {
+                    var speedText = $"{_currentUploadSpeed:F1} Mbps ⬆️";
+                    loadingWindow?.UpdateCurrentSpeed(speedText);
+                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Upload);
+                    loadingWindow?.UpdateDetail("📤 Testing upload speed...");
+                    Debug.WriteLine($"Stage updated to Upload: {speedText}");
+                }
+            }
+            else if (LatencyRegex.IsMatch(line))
+            {
+                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Latency);
+                loadingWindow?.UpdateDetail($"📡 Latency: {_currentLatency:F1} ms");
+                Debug.WriteLine($"Stage updated to Latency: {_currentLatency:F1} ms");
+            }
+            else if (ConnectingRegex.IsMatch(line) || line.Contains("Selecting server", StringComparison.OrdinalIgnoreCase))
+            {
+                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Connecting);
+                loadingWindow?.UpdateDetail("🔗 Connecting to server...");
+                Debug.WriteLine("Stage updated to Connecting");
+
+                var serverMatch = ServerRegex.Match(line);
+                if (serverMatch.Success)
+                {
+                    _currentServerName = serverMatch.Groups["serverName"].Value.Trim();
+                    loadingWindow?.UpdateServerInfo(_currentServerName);
+                    loadingWindow?.UpdateDetail($"🌐 Connected to {_currentServerName}");
+                    Debug.WriteLine($"Server name updated: {_currentServerName}");
+                }
+            }
+        }
+
+        private void ParseProgressValues(string line)
+        {
+            var downloadMatch = DownloadRegex.Match(line);
+            if (downloadMatch.Success && double.TryParse(downloadMatch.Groups["speed"].Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double downloadSpeed))
+            {
+                _currentDownloadSpeed = downloadSpeed;
+            }
+
+            var uploadMatch = UploadRegex.Match(line);
+            if (uploadMatch.Success && double.TryParse(uploadMatch.Groups["speed"].Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double uploadSpeed))
+            {
+                _currentUploadSpeed = uploadSpeed;
+            }
+
+            var latencyMatch = LatencyRegex.Match(line);
+            if (latencyMatch.Success && double.TryParse(latencyMatch.Groups["latency"].Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double latency))
+            {
+                _currentLatency = latency;
+            }
+
+            var serverMatch = ServerRegex.Match(line);
+            if (serverMatch.Success)
+            {
+                _currentServerName = serverMatch.Groups["serverName"].Value.Trim();
+            }
+        }
+
+        private void ResetCurrentValues()
+        {
+            _currentDownloadSpeed = 0;
+            _currentUploadSpeed = 0;
+            _currentLatency = 0;
+            _currentServerName = "";
         }
 
         private bool IsSpeedtestInPath()
         {
             try
             {
-                using (Process process = new Process())
-                {
-                    process.StartInfo.FileName = "where";
-                    process.StartInfo.Arguments = "speedtest.exe";
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.RedirectStandardOutput = true;
-                    process.StartInfo.CreateNoWindow = true;
-                    process.Start();
-                    string output = process.StandardOutput.ReadToEnd();
-                    process.WaitForExit();
-                    return !string.IsNullOrWhiteSpace(output) && output.Contains("speedtest.exe", StringComparison.OrdinalIgnoreCase);
-                }
+                using var process = new Process();
+                process.StartInfo.FileName = "where";
+                process.StartInfo.Arguments = "speedtest.exe";
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.CreateNoWindow = true;
+                process.Start();
+                string output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                return !string.IsNullOrWhiteSpace(output) && output.Contains("speedtest.exe", StringComparison.OrdinalIgnoreCase);
             }
             catch
             {
@@ -409,25 +638,28 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             }
         }
 
-        private SpeedTestResult ParseJsonOutput(string jsonOutput)
+        private SpeedTestResult ParseJsonOutput(string jsonOutput, string stderrOutput)
         {
             if (string.IsNullOrWhiteSpace(jsonOutput))
             {
-                Debug.WriteLine("ParseJsonOutput: Received null or whitespace JSON.");
-                throw new ArgumentException("JSON output cannot be null or whitespace.", nameof(jsonOutput));
+                throw new ArgumentException("Speedtest CLI returned no output. " + 
+                    (!string.IsNullOrEmpty(stderrOutput) ? $"Error: {stderrOutput}" : ""));
+            }
+
+            if (jsonOutput.Contains("Speedtest by Ookla is the official command line client") ||
+                jsonOutput.Contains("Usage: speedtest"))
+            {
+                throw new InvalidDataException("Speedtest CLI returned help information instead of results. Please check your CLI installation.");
             }
 
             try
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                };
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var result = JsonSerializer.Deserialize<SpeedTestResult>(jsonOutput, options);
 
                 if (result == null)
                 {
-                    throw new JsonException("Deserialization returned null. JSON might be valid but not matching the expected structure.");
+                    throw new JsonException("Failed to parse speedtest results. The JSON structure may have changed.");
                 }
 
                 result.UsingCliValues = true;
@@ -435,9 +667,89 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             }
             catch (JsonException jsonEx)
             {
-                Debug.WriteLine($"JSON Deserialization Error: {jsonEx.Message}. Path: {jsonEx.Path}, Line: {jsonEx.LineNumber}, Pos: {jsonEx.BytePositionInLine}");
-                Debug.WriteLine($"Problematic JSON (first 1000 chars): {jsonOutput.Substring(0, Math.Min(1000, jsonOutput.Length))}");
-                throw;
+                Debug.WriteLine($"JSON Parse Error: {jsonEx.Message}");
+                Debug.WriteLine($"Raw JSON: {jsonOutput.Substring(0, Math.Min(1000, jsonOutput.Length))}");
+                throw new JsonException($"Failed to parse speedtest results: {jsonEx.Message}");
+            }
+        }
+
+        private void SaveTestResult(SpeedTestResult result)
+        {
+            try
+            {
+                var historyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "test_history.json");
+
+                List<object> history = new List<object>();
+                if (File.Exists(historyPath))
+                {
+                    var existingJson = File.ReadAllText(historyPath);
+                    history = JsonSerializer.Deserialize<List<object>>(existingJson) ?? new List<object>();
+                }
+
+                var testRecord = new
+                {
+                    Timestamp = DateTime.Now,
+                    Download = result.Download?.Bandwidth / 125000,
+                    Upload = result.Upload?.Bandwidth / 125000,
+                    Latency = result.Ping?.Latency,
+                    Server = result.Server?.Name,
+                    Location = result.Server?.Location
+                };
+
+                history.Add(testRecord);
+
+                // Keep only last 50 tests
+                if (history.Count > 50)
+                {
+                    history = history.Skip(history.Count - 50).ToList();
+                }
+
+                var json = JsonSerializer.Serialize(history, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(historyPath, json);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to save test history: {ex.Message}");
+            }
+        }
+
+        private void ShowTestHistory()
+        {
+            try
+            {
+                var historyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "test_history.json");
+                if (File.Exists(historyPath))
+                {
+                    var json = File.ReadAllText(historyPath);
+                    var history = JsonSerializer.Deserialize<List<JsonElement>>(json);
+
+                    if (history?.Count > 0)
+                    {
+                        var recent = history.TakeLast(5);
+                        var message = "📊 Recent Speed Tests:\n\n" + 
+                            string.Join("\n", recent.Select(h => 
+                            {
+                                var timestamp = h.GetProperty("Timestamp").GetDateTime();
+                                var download = h.GetProperty("Download").GetDouble();
+                                var upload = h.GetProperty("Upload").GetDouble();
+                                return $"🕒 {timestamp:MMM dd, HH:mm} - ⬇️ {download:F1} Mbps ⬆️ {upload:F1} Mbps";
+                            }));
+
+                        _context.API.ShowMsg("Speed Test History", message, _iconPath);
+                    }
+                    else
+                    {
+                        _context.API.ShowMsg("Speed Test History", "📭 No test history found. Run some tests first!", _iconPath);
+                    }
+                }
+                else
+                {
+                    _context.API.ShowMsg("Speed Test History", "📭 No test history found. Run some tests first!", _iconPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                _context.API.ShowMsg("Error", $"❌ Failed to load history: {ex.Message}", _iconPath);
             }
         }
 
@@ -449,12 +761,9 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             try
             {
                 CancelSpeedTest(showNotifications: false);
-                
-                if (_cancellationTokenSource != null)
-                {
-                    _cancellationTokenSource.Dispose();
-                    _cancellationTokenSource = null;
-                }
+
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
 
                 if (_context?.API != null)
                 {
@@ -475,53 +784,75 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             GC.SuppressFinalize(this);
         }
 
-        // ISettingProvider implementation
-        public System.Windows.Controls.Control CreateSettingPanel()
+        // Enhanced settings panel
+        public Control CreateSettingPanel()
         {
-            var userControl = new System.Windows.Controls.UserControl();
+            var userControl = new UserControl();
             var stackPanel = new StackPanel();
-            
-            var checkBox = new CheckBox
+
+            // Copy to clipboard setting
+            var copyCheckBox = new CheckBox
             {
-                Content = "Copy results to clipboard automatically",
+                Content = "📋 Copy results to clipboard automatically",
                 IsChecked = _copyToClipboard,
                 Margin = new Thickness(10)
             };
-            
-            checkBox.Checked += (sender, e) =>
+            copyCheckBox.Checked += (s, e) => { _copyToClipboard = true; SaveSettings(); };
+            copyCheckBox.Unchecked += (s, e) => { _copyToClipboard = false; SaveSettings(); };
+
+            // Show notifications setting
+            var notificationsCheckBox = new CheckBox
             {
-                _copyToClipboard = true;
-                SaveSettings();
+                Content = "🔔 Show notifications",
+                IsChecked = _showNotifications,
+                Margin = new Thickness(10)
             };
-            
-            checkBox.Unchecked += (sender, e) =>
+            notificationsCheckBox.Checked += (s, e) => { _showNotifications = true; SaveSettings(); };
+            notificationsCheckBox.Unchecked += (s, e) => { _showNotifications = false; SaveSettings(); };
+
+            // Save history setting
+            var historyCheckBox = new CheckBox
             {
-                _copyToClipboard = false;
-                SaveSettings();
+                Content = "📊 Save test history",
+                IsChecked = _saveHistory,
+                Margin = new Thickness(10)
             };
-            
-            stackPanel.Children.Add(checkBox);
+            historyCheckBox.Checked += (s, e) => { _saveHistory = true; SaveSettings(); };
+            historyCheckBox.Unchecked += (s, e) => { _saveHistory = false; SaveSettings(); };
+
+            stackPanel.Children.Add(copyCheckBox);
+            stackPanel.Children.Add(notificationsCheckBox);
+            stackPanel.Children.Add(historyCheckBox);
             userControl.Content = stackPanel;
-            
+
             return userControl;
         }
 
-        public IEnumerable<PluginAdditionalOption> AdditionalOptions
-        {
-            get
+        public IEnumerable<PluginAdditionalOption> AdditionalOptions =>
+            new List<PluginAdditionalOption>
             {
-                return new List<PluginAdditionalOption>
+                new()
                 {
-                    new PluginAdditionalOption
-                    {
-                        Key = "CopyToClipboard",
-                        DisplayLabel = "Copy results to clipboard automatically",
-                        Value = _copyToClipboard,
-                        PluginOptionType = PluginAdditionalOption.AdditionalOptionType.Checkbox
-                    }
-                };
-            }
-        }
+                    Key = "CopyToClipboard",
+                    DisplayLabel = "Copy results to clipboard automatically",
+                    Value = _copyToClipboard,
+                    PluginOptionType = PluginAdditionalOption.AdditionalOptionType.Checkbox
+                },
+                new()
+                {
+                    Key = "ShowNotifications", 
+                    DisplayLabel = "Show notifications",
+                    Value = _showNotifications,
+                    PluginOptionType = PluginAdditionalOption.AdditionalOptionType.Checkbox
+                },
+                new()
+                {
+                    Key = "SaveHistory",
+                    DisplayLabel = "Save test history",
+                    Value = _saveHistory,
+                    PluginOptionType = PluginAdditionalOption.AdditionalOptionType.Checkbox
+                }
+            };
 
         public void UpdateSettings(PowerLauncherPluginSettings settings)
         {
@@ -529,13 +860,20 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             {
                 foreach (var option in settings.AdditionalOptions)
                 {
-                    if (option.Key == "CopyToClipboard")
+                    switch (option.Key)
                     {
-                        _copyToClipboard = option.Value;
-                        SaveSettings();
-                        break;
+                        case "CopyToClipboard":
+                            _copyToClipboard = option.Value;
+                            break;
+                        case "ShowNotifications":
+                            _showNotifications = option.Value;
+                            break;
+                        case "SaveHistory":
+                            _saveHistory = option.Value;
+                            break;
                     }
                 }
+                SaveSettings();
             }
         }
     }
