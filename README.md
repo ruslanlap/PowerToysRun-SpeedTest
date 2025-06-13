@@ -74,6 +74,13 @@
 
 ### Plugin Growth 📈
 
+## 📊 Download Statistics
+
+<div align="center">
+  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/total?style=for-the-badge&label=Total%20Downloads" alt="Total Downloads">
+  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/latest/total?style=for-the-badge&label=Latest%20Release" alt="Latest Release Downloads">
+</div>
+
 
 ## ⚡ Quick Start
 
