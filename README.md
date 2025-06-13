@@ -18,7 +18,7 @@
   </a>
   <img src="https://img.shields.io/maintenance/yes/2025" alt="Maintenance">
   <img src="https://img.shields.io/badge/C%23-.NET-512BD4" alt="C# .NET">
-  <img src="https://img.shields.io/badge/version-v1.0.3-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-v1.0.4-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/stargazers">
     <img src="https://img.shields.io/github/stars/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub stars">
@@ -42,10 +42,10 @@
 </div>
 
 <div align="center">
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.3/SpeedTest-1.0.3-x64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.4/SpeedTest-1.0.4-x64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-x64-blue?style=for-the-badge&logo=github" alt="Download x64">
   </a>
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.3/SpeedTest-1.0.3-ARM64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.4/SpeedTest-1.0.4-ARM64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-ARM64-blue?style=for-the-badge&logo=github" alt="Download ARM64">
   </a>
 </div>
@@ -53,25 +53,14 @@
 <br>
 
 ---
-## 📢 Latest Release Notes (v1.0.3)
+## 📢 Latest Release Notes (v1.0.4)
 
-### What's New? 🎉
-
-- **Optional Clipboard Integration** 📋
-  - Now you can choose whether to auto-copy results
-  - Disabled by default for better security
-  - Easy to toggle in PowerToys settings
-
-- **Enhanced UI** 🎨
-  - Modern button styling with better padding
-  - Consistent sizing and spacing
-  - Improved visual feedback
-  - Sleek animations on hover
-
-- **Stability Improvements** 🛡️
-  - Fixed notification spam on PowerToys exit
-  - Better error handling
-  - Improved resource cleanup
+### What's New? 🚀
+- **Real-time CLI output in UI**
+- **Correct speedtest CLI arguments**
+- **No more hardcoded demo data**
+- **Improved error handling**
+- **Live progress and real results!**
 
 ## 📊 Download Statistics
 
@@ -116,6 +105,26 @@
 
 ---
 
+## 📢 Previous Release Notes (v1.0.3)
+
+### What's New? 🎉
+
+- **Optional Clipboard Integration** 📋
+  - Now you can choose whether to auto-copy results
+  - Disabled by default for better security
+  - Easy to toggle in PowerToys settings
+
+- **Enhanced UI** 🎨
+  - Modern button styling with better padding
+  - Consistent sizing and spacing
+  - Improved visual feedback
+  - Sleek animations on hover
+
+- **Stability Improvements** 🛡️
+  - Fixed notification spam on PowerToys exit
+  - Better error handling
+  - Improved resource cleanup
+
 ## 📝 Overview
 
 **SpeedTest** is a PowerToys Run plugin that lets you check your internet speed instantly from your keyboard. Just type `spt` in PowerToys Run and launch a test—no browser required!
@@ -146,8 +155,8 @@
 </div>
 
 ## ⚡ Easy Install
-1. [Download the release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.3/SpeedTest-1.0.3-x64.zip)
-2. [Download the release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.3/SpeedTest-1.0.3-ARM64.zip)
+1. [Download the release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.4/SpeedTest-1.0.4-x64.zip)
+2. [Download the release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.4/SpeedTest-1.0.4-ARM64.zip)
 3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 4. Restart PowerToys
 5. Press `Alt+Space`, type `spt`, and hit Enter!
