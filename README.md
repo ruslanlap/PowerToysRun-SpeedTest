@@ -50,8 +50,12 @@
   </a>
 </div>
 
----
+<div align="center">
+  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/total?style=for-the-badge&label=Total%20Downloads" alt="Total Downloads">
+  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/latest/total?style=for-the-badge&label=Latest%20Release" alt="Latest Release Downloads">
+</div>
 
+---
 ## 📢 Latest Release Notes (v1.0.3)
 
 ### What's New? 🎉
@@ -71,8 +75,6 @@
   - Fixed notification spam on PowerToys exit
   - Better error handling
   - Improved resource cleanup
-
-
 
 ## 📊 Download Statistics
 
