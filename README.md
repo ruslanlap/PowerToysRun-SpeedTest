@@ -106,6 +106,7 @@
 - [📝 Changelog](#-changelog)
 - [🌐 Localization](#-localization)
 - [📸 Screenshots](#-screenshots)
+- [📋 Release Notes](#-release-notes)
 
 ---
 
@@ -257,6 +258,11 @@ MIT License. See [LICENSE](LICENSE).
 ## 📝 Changelog
 
 See the [CHANGELOG.md](CHANGELOG.md) for detailed version history and the [RELEASE.md](RELEASE.md) for latest release notes.
+
+## 📋 Release Notes
+
+- [📋 Release Notes v1.0.3](RELEASE_NOTES_v1.0.3.md) - Latest release with all GitHub issues resolved
+- [📋 GitHub Release Description](GITHUB_RELEASE_DESCRIPTION.md) - Concise release description for GitHub
 
 ---
 
