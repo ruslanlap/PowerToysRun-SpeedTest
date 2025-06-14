@@ -12,7 +12,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 {
     public partial class LoadingWindow : Window
     {
-        private Storyboard _spinnerAnimation;
         private TestStage _currentStage = TestStage.Connecting;
         private DispatcherTimer _dotAnimationTimer;
         private bool _isCompleted = false;
@@ -39,25 +38,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             {
                 // Initialize step indicators with proper transforms
                 InitializeStepIndicators();
-
-                // Try to start spinner animation
-                try
-                {
-                    _spinnerAnimation = FindResource("SpinnerAnimation") as Storyboard;
-                    if (_spinnerAnimation != null)
-                    {
-                        _spinnerAnimation.Begin(this, true);
-                    }
-                    else
-                    {
-                        Debug.WriteLine("WARNING: SpinnerAnimation resource not found");
-                    }
-                }
-                catch (Exception animEx)
-                {
-                    Debug.WriteLine($"WARNING: Failed to start spinner animation: {animEx.Message}");
-                    // Continue without spinner animation
-                }
 
                 _dotAnimationTimer = new DispatcherTimer
                 {
@@ -351,6 +331,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 {
                     UpdateStageIndicators(stage);
                     UpdateProgressLine(stage);
+                    UpdateCenterText(stage);
 
                     if (stage == TestStage.Complete && !_isCompleted)
                     {
@@ -528,14 +509,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     stopTimer.Tick += (s, e) =>
                     {
                         stopTimer.Stop();
-                        try
-                        {
-                            _spinnerAnimation?.Pause(this);
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine($"Failed to pause spinner animation: {ex.Message}");
-                        }
                     };
                     stopTimer.Start();
                 }
@@ -603,7 +576,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             base.OnClosed(e);
             try
             {
-                _spinnerAnimation?.Stop(this);
                 _dotAnimationTimer?.Stop();
             }
             catch (Exception ex)
@@ -643,6 +615,24 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 // Fallback: just close immediately
                 Close();
             }
+        }
+
+        private void UpdateCenterText(TestStage stage)
+        {
+            if (CenterText == null) return;
+
+            string text = stage switch
+            {
+                TestStage.Connecting => "Connecting to server...",
+                TestStage.Latency => "Testing latency...",
+                TestStage.Download => "Testing download...",
+                TestStage.Upload => "Testing upload...",
+                TestStage.Complete => "Complete!",
+                TestStage.Error => "Error occurred",
+                _ => "Initializing..."
+            };
+
+            CenterText.Text = text;
         }
     }
 }

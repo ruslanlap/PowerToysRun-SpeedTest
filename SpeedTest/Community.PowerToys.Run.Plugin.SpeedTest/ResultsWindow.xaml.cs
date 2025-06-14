@@ -5,11 +5,17 @@ using System.Windows.Media;
 using System.Windows.Navigation;
 using Microsoft.Win32; // For Registry
 using System;
+using System.Windows.Interop;
+using System.Runtime.InteropServices;
 
 namespace Community.PowerToys.Run.Plugin.SpeedTest
 {
     public partial class ResultsWindow : Window // Ensure this matches your XAML
     {
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool FlashWindow(IntPtr hWnd, bool bInvert);
+
         private readonly SpeedTestResult _result;
 
         public ResultsWindow(SpeedTestResult result)
@@ -21,6 +27,9 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             DataContext = _result; // Set DataContext for XAML bindings
 
             ApplyTheme(); // Apply theme after InitializeComponent and DataContext are set.
+
+            // Flash the window when it's loaded
+            this.Loaded += (s, e) => FlashWindow(new WindowInteropHelper(this).Handle, true);
 
             #if DEBUG
             // Log the result data for debugging purposes.

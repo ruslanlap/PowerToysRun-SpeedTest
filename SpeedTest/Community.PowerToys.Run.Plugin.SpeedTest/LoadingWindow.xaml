@@ -37,53 +37,6 @@
             <GradientStop Color="#252631" Offset="1"/>
         </LinearGradientBrush>
 
-        <!-- Advanced Animations -->
-        <Storyboard x:Key="SpinnerAnimation" RepeatBehavior="Forever">
-            <!-- Primary ring rotation -->
-            <DoubleAnimation
-                Storyboard.TargetName="PrimaryRingRotation"
-                Storyboard.TargetProperty="Angle"
-                From="0"
-                To="360"
-                Duration="0:0:3" />
-
-            <!-- Secondary ring counter-rotation -->
-            <DoubleAnimation
-                Storyboard.TargetName="SecondaryRingRotation"
-                Storyboard.TargetProperty="Angle"
-                From="360"
-                To="0"
-                Duration="0:0:4" />
-
-            <!-- Pulse animation for center -->
-            <DoubleAnimation
-                Storyboard.TargetName="CenterPulse"
-                Storyboard.TargetProperty="ScaleX"
-                From="1"
-                To="1.1"
-                Duration="0:0:2"
-                AutoReverse="True"
-                RepeatBehavior="Forever" />
-            <DoubleAnimation
-                Storyboard.TargetName="CenterPulse"
-                Storyboard.TargetProperty="ScaleY"
-                From="1"
-                To="1.1"
-                Duration="0:0:2"
-                AutoReverse="True"
-                RepeatBehavior="Forever" />
-
-            <!-- Floating animation for speed text -->
-            <DoubleAnimation
-                Storyboard.TargetName="SpeedTextTransform"
-                Storyboard.TargetProperty="Y"
-                From="0"
-                To="-3"
-                Duration="0:0:1.5"
-                AutoReverse="True"
-                RepeatBehavior="Forever" />
-        </Storyboard>
-
         <!-- Step Progress Animation -->
         <Storyboard x:Key="StepCompleteAnimation">
             <DoubleAnimation
@@ -146,12 +99,29 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Storyboard для анімації крапок -->
+        <Storyboard x:Key="DotsAnimation" RepeatBehavior="Forever">
+            <!-- Анімація для кожної крапки з різними BeginTime -->
+            <DoubleAnimation Storyboard.TargetName="Dot1" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0"/>
+            <DoubleAnimation Storyboard.TargetName="Dot2" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.08"/>
+            <DoubleAnimation Storyboard.TargetName="Dot3" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.16"/>
+            <DoubleAnimation Storyboard.TargetName="Dot4" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.24"/>
+            <DoubleAnimation Storyboard.TargetName="Dot5" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.32"/>
+            <DoubleAnimation Storyboard.TargetName="Dot6" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.40"/>
+            <DoubleAnimation Storyboard.TargetName="Dot7" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.48"/>
+            <DoubleAnimation Storyboard.TargetName="Dot8" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.56"/>
+            <DoubleAnimation Storyboard.TargetName="Dot9" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.64"/>
+            <DoubleAnimation Storyboard.TargetName="Dot10" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.72"/>
+            <DoubleAnimation Storyboard.TargetName="Dot11" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.80"/>
+            <DoubleAnimation Storyboard.TargetName="Dot12" Storyboard.TargetProperty="Opacity" From="0.2" To="1" Duration="0:0:0.2" BeginTime="0:0:0.88"/>
+        </Storyboard>
     </Window.Resources>
 
-    <!-- Auto-start animation on window load -->
+    <!-- Тригер для запуску анімації -->
     <Window.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-            <BeginStoryboard Storyboard="{StaticResource SpinnerAnimation}"/>
+            <BeginStoryboard Storyboard="{StaticResource DotsAnimation}"/>
         </EventTrigger>
     </Window.Triggers>
 
@@ -193,92 +163,124 @@
 
             <!-- Advanced circular progress indicator -->
             <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,32">
-                <!-- Glassmorphic background -->
-                <Border Width="280" Height="280" 
-                        CornerRadius="140" 
-                        Background="#1A252631" 
-                        BorderBrush="#33FFFFFF" 
-                        BorderThickness="1">
-                    <Border.Effect>
-                        <BlurEffect Radius="1"/>
-                    </Border.Effect>
-                </Border>
-
-                <!-- Outer decorative rings -->
-                <Canvas Width="280" Height="280">
-                    <!-- Primary ring -->
-                    <Grid>
-                        <Grid.RenderTransform>
-                            <RotateTransform x:Name="PrimaryRingRotation" CenterX="140" CenterY="140"/>
-                        </Grid.RenderTransform>
-                        <Ellipse Width="280" Height="280"
-                                 Stroke="{StaticResource PrimaryGradient}"
-                                 StrokeThickness="3"
-                                 StrokeDashArray="200 100"
-                                 Fill="Transparent">
-                            <Ellipse.Effect>
-                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#6366F1" Opacity="0.4"/>
-                            </Ellipse.Effect>
+                <!-- Бігаючі крапки по колу -->
+                <Canvas Width="120" Height="120" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- 12 крапок по колу з іменами -->
+                    <Ellipse x:Name="Dot1" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="0" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot2" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="30" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot3" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="60" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot4" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="90" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot5" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="120" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot6" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="150" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot7" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="180" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot8" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="210" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot9" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="240" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot10" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="270" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse x:Name="Dot11" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="300" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
                         </Ellipse>
-                    </Grid>
-
-                    <!-- Secondary ring -->
-                    <Grid>
-                        <Grid.RenderTransform>
-                            <RotateTransform x:Name="SecondaryRingRotation" CenterX="140" CenterY="140"/>
-                        </Grid.RenderTransform>
-                        <Ellipse Width="240" Height="240"
-                                 Canvas.Left="20" Canvas.Top="20"
-                                 Stroke="#00D4FF"
-                                 StrokeThickness="2"
-                                 StrokeDashArray="80 120"
-                                 Fill="Transparent"
-                                 Opacity="0.6">
-                            <Ellipse.Effect>
-                                <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#00D4FF" Opacity="0.3"/>
-                            </Ellipse.Effect>
+                    <Ellipse x:Name="Dot12" Width="14" Height="14" Fill="#00D4FF" Opacity="0.2">
+                        <Ellipse.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="330" CenterX="60" CenterY="60"/>
+                                <TranslateTransform X="0" Y="-48"/>
+                            </TransformGroup>
+                        </Ellipse.RenderTransform>
                         </Ellipse>
-                    </Grid>
                 </Canvas>
-
-                <!-- Center content with pulse animation -->
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <StackPanel.RenderTransform>
-                        <ScaleTransform x:Name="CenterPulse"/>
-                    </StackPanel.RenderTransform>
-
-                    <!-- Speed display -->
-                    <TextBlock x:Name="CurrentSpeedText"
-                               Text=""
-                               FontSize="28"
-                               FontWeight="Bold"
-                               Foreground="{StaticResource AccentBrush}"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,8">
-                        <TextBlock.RenderTransform>
-                            <TranslateTransform x:Name="SpeedTextTransform"/>
-                        </TextBlock.RenderTransform>
-                        <TextBlock.Effect>
-                            <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#00D4FF" Opacity="0.6"/>
-                        </TextBlock.Effect>
-                    </TextBlock>
-
-                    <!-- Status text -->
-                    <TextBlock x:Name="StatusText"
-                               Text="Connecting..."
-                               FontSize="16"
+                <!-- Текст по центру кільця -->
+                <TextBlock x:Name="CenterText"
+                           Text="Connecting to server..." 
+                           FontSize="11" 
                                FontWeight="Medium"
-                               Foreground="{StaticResource TextPrimaryBrush}"
+                           Foreground="#E6F6FF" 
                                HorizontalAlignment="Center"
-                               Margin="0,0,0,4"/>
-
-                    <!-- Server info -->
-                    <TextBlock x:Name="ServerNameText"
-                               Text=""
-                               FontSize="12"
-                               Foreground="{StaticResource TextSecondaryBrush}"
-                               HorizontalAlignment="Center"
-                               Opacity="0.8"/>
+                           VerticalAlignment="Center"
+                           TextAlignment="Center"
+                           Width="100"
+                           Height="40"
+                           TextWrapping="Wrap"
+                           LineHeight="12"/>
+                <!-- Статус, швидкість, сервер -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,140,0,0">
+                    <TextBlock x:Name="StatusText" Text="" FontSize="14" FontWeight="Medium" Foreground="#B8BCC8" HorizontalAlignment="Center" Margin="0,4,0,0" Visibility="Collapsed"/>
+                    <TextBlock x:Name="CurrentSpeedText" Text="" FontSize="22" FontWeight="Bold" Foreground="#00D4FF" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    <TextBlock x:Name="ServerNameText" Text="" FontSize="12" Foreground="#B8BCC8" HorizontalAlignment="Center" Opacity="0.8" Margin="0,4,0,0"/>
                 </StackPanel>
             </Grid>
 

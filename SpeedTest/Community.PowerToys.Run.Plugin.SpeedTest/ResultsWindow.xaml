@@ -10,7 +10,7 @@
     Height="600"
     Width="800"
     ResizeMode="NoResize"
-    WindowStartupLocation="CenterOwner"
+    WindowStartupLocation="CenterScreen"
     Background="{DynamicResource BackgroundBrush}"
     Foreground="{DynamicResource TextBrush}"
     FontFamily="Segoe UI">
