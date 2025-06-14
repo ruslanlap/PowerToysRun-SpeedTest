@@ -59,9 +59,6 @@
 - **🎨 Beautiful New Loading Animation** - Classic "running dots" spinner like Speedtest.net
 - **📱 Enhanced User Interface** - Improved window positioning and better text layout
 - **⚡ Window Flash Notification** - Results window now flashes to grab attention when complete
-- **🎯 Better Window Management** - Results window centers on screen instead of random positioning
-- **🔧 Optimized Animations** - Smoother, faster loading animations with better timing
-- **💫 Modern UI Elements** - Updated styling and better visual feedback throughout
 
 ## 📊 Download Statistics
 
