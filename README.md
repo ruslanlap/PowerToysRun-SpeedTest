@@ -18,7 +18,7 @@
   </a>
   <img src="https://img.shields.io/maintenance/yes/2025" alt="Maintenance">
   <img src="https://img.shields.io/badge/C%23-.NET-512BD4" alt="C# .NET">
-  <img src="https://img.shields.io/badge/version-v1.0.4-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-v1.0.5-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/stargazers">
     <img src="https://img.shields.io/github/stars/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub stars">
@@ -42,10 +42,10 @@
 </div>
 
 <div align="center">
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.4/SpeedTest-1.0.4-x64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-x64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-x64-blue?style=for-the-badge&logo=github" alt="Download x64">
   </a>
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.4/SpeedTest-1.0.4-ARM64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-ARM64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-ARM64-blue?style=for-the-badge&logo=github" alt="Download ARM64">
   </a>
 </div>
@@ -53,14 +53,15 @@
 <br>
 
 ---
-## 📢 Latest Release Notes (v1.0.4)
+## 📢 Latest Release Notes (v1.0.5)
 
 ### What's New? 🚀
-- **Real-time CLI output in UI**
-- **Correct speedtest CLI arguments**
-- **No more hardcoded demo data**
-- **Improved error handling**
-- **Live progress and real results!**
+- **🎨 Beautiful New Loading Animation** - Classic "running dots" spinner like Speedtest.net
+- **📱 Enhanced User Interface** - Improved window positioning and better text layout
+- **⚡ Window Flash Notification** - Results window now flashes to grab attention when complete
+- **🎯 Better Window Management** - Results window centers on screen instead of random positioning
+- **🔧 Optimized Animations** - Smoother, faster loading animations with better timing
+- **💫 Modern UI Elements** - Updated styling and better visual feedback throughout
 
 ## 📊 Download Statistics
 
@@ -105,6 +106,16 @@
 
 ---
 
+## 📢 Previous Release Notes (v1.0.4)
+
+### What's New? 🎉
+
+- **Real-time CLI output in UI**
+- **Correct speedtest CLI arguments**
+- **No more hardcoded demo data**
+- **Improved error handling**
+- **Live progress and real results!**
+
 ## 📢 Previous Release Notes (v1.0.3)
 
 ### What's New? 🎉
@@ -137,9 +148,10 @@
 ## ✨ Features
 - ⚡ One-command internet speed test from PowerToys Run
 - 📊 Shows download, upload, ping, server info, and shareable result URL
-- 🖼️ Modern WPF UI with real-time progress and results
+- 🖼️ Beautiful modern WPF UI with animated loading and real-time progress
+- 🎨 Classic "running dots" loading animation like Speedtest.net
 - 🎨 Theme-aware (dark/light icons, adapts to system theme)
-- 📋 Optional clipboard integration (configurable in settings)
+- �� Optional clipboard integration (configurable in settings)
 - 🎯 Enhanced UI with modern button styling
 - 🛡️ Improved stability and error handling
 - 🔧 Persistent user settings
@@ -155,8 +167,8 @@
 </div>
 
 ## ⚡ Easy Install
-1. [Download the release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.4/SpeedTest-1.0.4-x64.zip)
-2. [Download the release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.4/SpeedTest-1.0.4-ARM64.zip)
+1. [Download the release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-x64.zip)
+2. [Download the release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-ARM64.zip)
 3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 4. Restart PowerToys
 5. Press `Alt+Space`, type `spt`, and hit Enter!
@@ -165,7 +177,8 @@
 ## 🚀 Usage     
 - Open PowerToys Run (`Alt+Space`)    
 - Type `spt` and select `Run Speed Test`
-- View real-time progress and detailed results
+- Enjoy the beautiful loading animation and view real-time progress
+- Results window will flash when complete to get your attention
 - Configure clipboard settings in PowerToys settings
 - Click the result URL to view/share your result online
 
