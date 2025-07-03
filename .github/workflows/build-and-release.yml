@@ -133,12 +133,31 @@ jobs:
               }
             }
           }
+          
+          # Remove unnecessary PowerToys DLLs that are provided by the host
+          $unnecessaryDlls = @(
+            "PowerToys.Common.UI.dll",
+            "PowerToys.ManagedCommon.dll", 
+            "PowerToys.Settings.UI.Lib.dll",
+            "Wox.Infrastructure.dll",
+            "Wox.Plugin.dll"
+          )
+          
+          foreach ($dll in $unnecessaryDlls) {
+            $dllPath = "$artifactDir/SpeedTest/$dll"
+            if (Test-Path $dllPath) {
+              Write-Host "Removing unnecessary DLL: $dll"
+              Remove-Item $dllPath -Force
+            }
+          }
         shell: pwsh
       
       - name: Create ZIP archive
         run: |
           $artifactDir = "artifacts/SpeedTest-v${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}"
-          Compress-Archive -Path "$artifactDir/SpeedTest/*" -DestinationPath "$artifactDir.zip"
+          $zipName = "SpeedTest-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip"
+          # Create ZIP with SpeedTest folder inside
+          Compress-Archive -Path "$artifactDir/SpeedTest" -DestinationPath "artifacts/$zipName"
         shell: pwsh
       
       - name: Upload build artifacts
@@ -179,16 +198,11 @@ jobs:
       - name: Prepare artifacts for release
         run: |
           mkdir -p release-artifacts
-          cp downloaded-artifacts/build-artifacts-x64/*.zip release-artifacts/SpeedTest-x64.zip || echo "Failed to copy x64 artifact"
-          cp downloaded-artifacts/build-artifacts-arm64/*.zip release-artifacts/SpeedTest-ARM64.zip || echo "Failed to copy ARM64 artifact"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          cp downloaded-artifacts/build-artifacts-x64/SpeedTest-${VERSION}-x64.zip release-artifacts/ || echo "Failed to copy x64 artifact"
+          cp downloaded-artifacts/build-artifacts-arm64/SpeedTest-${VERSION}-arm64.zip release-artifacts/SpeedTest-${VERSION}-ARM64.zip || echo "Failed to copy ARM64 artifact"
           echo "Listing release artifacts:"
           ls -la release-artifacts
-      
-      - name: Rename release artifacts for convention
-        run: |
-          VERSION="${{ steps.get_version.outputs.VERSION }}"
-          mv release-artifacts/SpeedTest-x64.zip release-artifacts/SpeedTest-${VERSION}-x64.zip
-          mv release-artifacts/SpeedTest-ARM64.zip release-artifacts/SpeedTest-${VERSION}-ARM64.zip
       
       - name: Prepare Release Notes
         id: release_notes

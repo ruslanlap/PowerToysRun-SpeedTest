@@ -163,13 +163,30 @@
   <img src="SpeedTest/data/demo3.png" width="350" alt="Demo 3">
 </div>
 
-## ⚡ Easy Install
-1. [Download the release (x64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-x64.zip)
-2. [Download the release (ARM64)](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-ARM64.zip)
-3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
-4. Restart PowerToys
-5. Press `Alt+Space`, type `spt`, and hit Enter!
-6. Configure clipboard settings in PowerToys settings if needed
+## ⚡ Installation
+
+### Prerequisites
+- Windows 10/11
+- PowerToys installed and running
+
+### Steps
+1. Download the appropriate ZIP file for your platform:
+   - [x64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-x64.zip)
+   - [ARM64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-ARM64.zip)
+
+2. Extract the ZIP file to your PowerToys plugins directory:
+   ```
+   %LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\
+   ```
+   
+3. Restart PowerToys completely:
+   - Right-click PowerToys in system tray → Exit
+   - Start PowerToys again
+
+4. Test the plugin:
+   - Press `Alt+Space` to open PowerToys Run
+   - Type `spt` and hit Enter
+   - Configure clipboard settings in PowerToys settings if needed
 
 ## 🚀 Usage     
 - Open PowerToys Run (`Alt+Space`)    
