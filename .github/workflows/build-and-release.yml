@@ -248,8 +248,8 @@ jobs:
         run: |
           cd release-artifacts
           VERSION="${{ steps.get_version.outputs.VERSION }}"
-          sha256sum SpeedTest-${VERSION}-x64.zip > SpeedTest-${VERSION}-x64.zip.sha256
-          sha256sum SpeedTest-${VERSION}-ARM64.zip > SpeedTest-${VERSION}-ARM64.zip.sha256
+          sha256sum SpeedTest-${VERSION}-x64.zip | tr 'a-f' 'A-F' > SpeedTest-${VERSION}-x64.zip.sha256
+          sha256sum SpeedTest-${VERSION}-ARM64.zip | tr 'a-f' 'A-F' > SpeedTest-${VERSION}-ARM64.zip.sha256
           
           # Create combined checksum.txt file
           echo "SHA256 Checksums for SpeedTest Plugin v${VERSION}" > checksum.txt
