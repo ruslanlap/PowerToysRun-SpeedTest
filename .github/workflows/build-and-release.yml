@@ -250,6 +250,13 @@ jobs:
           VERSION="${{ steps.get_version.outputs.VERSION }}"
           sha256sum SpeedTest-${VERSION}-x64.zip > SpeedTest-${VERSION}-x64.zip.sha256
           sha256sum SpeedTest-${VERSION}-ARM64.zip > SpeedTest-${VERSION}-ARM64.zip.sha256
+          
+          # Create combined checksum.txt file
+          echo "SHA256 Checksums for SpeedTest Plugin v${VERSION}" > checksum.txt
+          echo "Generated on: $(date -u)" >> checksum.txt
+          echo "" >> checksum.txt
+          cat SpeedTest-${VERSION}-x64.zip.sha256 >> checksum.txt
+          cat SpeedTest-${VERSION}-ARM64.zip.sha256 >> checksum.txt
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -263,5 +270,6 @@ jobs:
             release-artifacts/SpeedTest-${{ steps.get_version.outputs.VERSION }}-ARM64.zip
             release-artifacts/SpeedTest-${{ steps.get_version.outputs.VERSION }}-x64.zip.sha256
             release-artifacts/SpeedTest-${{ steps.get_version.outputs.VERSION }}-ARM64.zip.sha256
+            release-artifacts/checksum.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
