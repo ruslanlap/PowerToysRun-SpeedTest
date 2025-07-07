@@ -38,6 +38,8 @@
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platform">
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+    <a href="https://github.com/hlaueriksson/awesome-powertoys-run-plugins">
+    <img src="https://awesome.re/mentioned-badge.svg" alt="Mentioned in Awesome PowerToys Run Plugins">
   </a>
 </div>
 
