@@ -45,12 +45,14 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         private DateTime _testStartTime;
 
         // Regexes for parsing CLI output
-        private static readonly Regex ServerRegex = new Regex(@"(Server:|Hosted by)\s*(?<serverName>[^\(]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ServerRegex = new Regex(@"(Server:|Hosted by|Testing from)\s*(?<serverName>[^\(]+)(?:\((?<location>[^\)]+)\))?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex LatencyRegex = new Regex(@"(Ping|Latency):?\s*(?<latency>\d+[\.,]?\d*)\s*ms", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex DownloadRegex = new Regex(@"Download:?\s*(?<speed>\d+[\.,]?\d*)\s*Mbps", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex UploadRegex = new Regex(@"Upload:?\s*(?<speed>\d+[\.,]?\d*)\s*Mbps", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex ConnectingRegex = new Regex(@"(Connecting to|Selecting server|Testing from)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex DownloadRegex = new Regex(@"Download:?\s*(?<speed>\d+[\.,]?\d*)\s*(Mbit/s|Mbps)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex UploadRegex = new Regex(@"Upload:?\s*(?<speed>\d+[\.,]?\d*)\s*(Mbit/s|Mbps)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ConnectingRegex = new Regex(@"(Connecting to|Selecting server|Testing from|Retrieving speedtest.net configuration)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex TestingRegex = new Regex(@"Testing (download|upload)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex TestProgressRegex = new Regex(@"Testing (download|upload) speed", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex IdleLatencyRegex = new Regex(@"Idle Latency:?\s*(?<latency>\d+[\.,]?\d*)\s*ms", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public Main()
         {
@@ -431,9 +433,12 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             var cliJsonOutput = new StringBuilder();
             var cliStdErrAggregator = new StringBuilder();
             var cliAllOutput = new StringBuilder();
+            var cliRawOutput = new StringBuilder(); // For parsing final results
 
             string speedtestExe = File.Exists(_cliPath) ? _cliPath : "speedtest";
-            var arguments = "--accept-license --accept-gdpr --format=json";
+            
+            // Use human-readable format for real-time progress, not JSON
+            var arguments = "--accept-license --accept-gdpr --progress=yes";
 
             if (!string.IsNullOrEmpty(_preferredServer))
             {
@@ -458,19 +463,22 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             {
                 if (e.Data != null)
                 {
-                    cliJsonOutput.AppendLine(e.Data);
-
-                    if (!e.Data.Trim().StartsWith("{") && !e.Data.Trim().StartsWith("}") && 
-                        !string.IsNullOrWhiteSpace(e.Data.Trim()))
+                    cliRawOutput.AppendLine(e.Data);
+                    
+                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
+                    cliAllOutput.AppendLine($"[{timestamp}] {e.Data}");
+                    
+                    if (showUI)
                     {
-                        cliAllOutput.AppendLine($"[INFO] {e.Data}");
-                        if (showUI)
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
-                            });
-                        }
+                            loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
+                            ParseAndUpdateProgress(e.Data, loadingWindow, cliAllOutput);
+                        });
+                    }
+                    else
+                    {
+                        ParseProgressValues(e.Data);
                     }
                 }
             };
@@ -481,14 +489,15 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 {
                     string line = e.Data;
                     cliStdErrAggregator.AppendLine(line);
-                    cliAllOutput.AppendLine($"[STDERR] {line}");
+                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
+                    cliAllOutput.AppendLine($"[{timestamp}] {line}");
 
                     if (showUI)
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
-                            ParseAndUpdateProgress(line, loadingWindow);
+                            ParseAndUpdateProgress(line, loadingWindow, cliAllOutput);
                         });
                     }
                     else
@@ -502,13 +511,25 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    cliAllOutput.AppendLine($"🔧 Executing: {psi.FileName} {psi.Arguments}");
-                    cliAllOutput.AppendLine("⏳ Waiting for CLI response...");
+                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
+                    cliAllOutput.AppendLine($"[{timestamp}] 🔧 Executing: speedtest {arguments}");
+                    cliAllOutput.AppendLine($"[{timestamp}] ⏳ Initializing speed test...");
                     loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
                 });
             }
 
             process.Start();
+            
+            if (showUI)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
+                    cliAllOutput.AppendLine($"[{timestamp}] ⚙️ Process started, waiting for response...");
+                    loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
+                });
+            }
+            
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
@@ -523,49 +544,25 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
+                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
+                    cliAllOutput.AppendLine($"[{timestamp}] ✅ Speed test completed successfully!");
+                    cliAllOutput.AppendLine($"[{timestamp}] 📋 Processing results...");
+                    loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
                     loadingWindow?.UpdateStage(LoadingWindow.TestStage.Complete);
                     loadingWindow?.UpdateDetail("✅ Test finished. Processing results...");
                 });
             }
 
-            return ParseJsonOutput(cliJsonOutput.ToString(), cliStdErrAggregator.ToString());
+            return ParseHumanReadableOutput(cliRawOutput.ToString(), cliStdErrAggregator.ToString());
         }
 
-        private void ParseAndUpdateProgress(string line, LoadingWindow loadingWindow)
+        private void ParseAndUpdateProgress(string line, LoadingWindow loadingWindow, StringBuilder cliAllOutput)
         {
             ParseProgressValues(line);
 
-            if (DownloadRegex.IsMatch(line) && !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
-            {
-                var match = DownloadRegex.Match(line);
-                if (match.Success)
-                {
-                    var speedText = $"{_currentDownloadSpeed:F1} Mbps ⬇️";
-                    loadingWindow?.UpdateCurrentSpeed(speedText);
-                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Download);
-                    loadingWindow?.UpdateDetail("📥 Testing download speed...");
-                    Debug.WriteLine($"Stage updated to Download: {speedText}");
-                }
-            }
-            else if (UploadRegex.IsMatch(line) && !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
-            {
-                var match = UploadRegex.Match(line);
-                if (match.Success)
-                {
-                    var speedText = $"{_currentUploadSpeed:F1} Mbps ⬆️";
-                    loadingWindow?.UpdateCurrentSpeed(speedText);
-                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Upload);
-                    loadingWindow?.UpdateDetail("📤 Testing upload speed...");
-                    Debug.WriteLine($"Stage updated to Upload: {speedText}");
-                }
-            }
-            else if (LatencyRegex.IsMatch(line))
-            {
-                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Latency);
-                loadingWindow?.UpdateDetail($"📡 Latency: {_currentLatency:F1} ms");
-                Debug.WriteLine($"Stage updated to Latency: {_currentLatency:F1} ms");
-            }
-            else if (ConnectingRegex.IsMatch(line) || line.Contains("Selecting server", StringComparison.OrdinalIgnoreCase))
+            // Match various connection/setup phases
+            if (ConnectingRegex.IsMatch(line) || line.Contains("Selecting server", StringComparison.OrdinalIgnoreCase) ||
+                line.Contains("Retrieving speedtest.net", StringComparison.OrdinalIgnoreCase))
             {
                 loadingWindow?.UpdateStage(LoadingWindow.TestStage.Connecting);
                 loadingWindow?.UpdateDetail("🔗 Connecting to server...");
@@ -579,6 +576,47 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     loadingWindow?.UpdateDetail($"🌐 Connected to {_currentServerName}");
                     Debug.WriteLine($"Server name updated: {_currentServerName}");
                 }
+            }
+            // Match testing phases
+            else if (TestingRegex.IsMatch(line) || TestProgressRegex.IsMatch(line))
+            {
+                if (line.Contains("download", StringComparison.OrdinalIgnoreCase))
+                {
+                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Download);
+                    loadingWindow?.UpdateDetail("📥 Testing download speed...");
+                    Debug.WriteLine("Stage updated to Download");
+                }
+                else if (line.Contains("upload", StringComparison.OrdinalIgnoreCase))
+                {
+                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Upload);
+                    loadingWindow?.UpdateDetail("📤 Testing upload speed...");
+                    Debug.WriteLine("Stage updated to Upload");
+                }
+            }
+            // Match latency results
+            else if (LatencyRegex.IsMatch(line) || IdleLatencyRegex.IsMatch(line))
+            {
+                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Latency);
+                loadingWindow?.UpdateDetail($"📡 Latency: {_currentLatency:F1} ms");
+                Debug.WriteLine($"Stage updated to Latency: {_currentLatency:F1} ms");
+            }
+            // Match download speed results
+            else if (DownloadRegex.IsMatch(line) && !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
+            {
+                var speedText = $"{_currentDownloadSpeed:F1} Mbps ⬇️";
+                loadingWindow?.UpdateCurrentSpeed(speedText);
+                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Download);
+                loadingWindow?.UpdateDetail($"📥 Download: {_currentDownloadSpeed:F1} Mbps");
+                Debug.WriteLine($"Download speed: {_currentDownloadSpeed:F1} Mbps");
+            }
+            // Match upload speed results
+            else if (UploadRegex.IsMatch(line) && !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
+            {
+                var speedText = $"{_currentUploadSpeed:F1} Mbps ⬆️";
+                loadingWindow?.UpdateCurrentSpeed(speedText);
+                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Upload);
+                loadingWindow?.UpdateDetail($"📤 Upload: {_currentUploadSpeed:F1} Mbps");
+                Debug.WriteLine($"Upload speed: {_currentUploadSpeed:F1} Mbps");
             }
         }
 
@@ -671,6 +709,79 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 Debug.WriteLine($"Raw JSON: {jsonOutput.Substring(0, Math.Min(1000, jsonOutput.Length))}");
                 throw new JsonException($"Failed to parse speedtest results: {jsonEx.Message}");
             }
+        }
+
+        private SpeedTestResult ParseHumanReadableOutput(string rawOutput, string stderrOutput)
+        {
+            if (string.IsNullOrWhiteSpace(rawOutput))
+            {
+                throw new ArgumentException("Speedtest CLI returned no output. " + 
+                    (!string.IsNullOrEmpty(stderrOutput) ? $"Error: {stderrOutput}" : ""));
+            }
+
+            var result = new SpeedTestResult();
+            var lines = rawOutput.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            
+            double downloadSpeed = 0;
+            double uploadSpeed = 0;
+            double latency = 0;
+            string serverName = "";
+            string serverLocation = "";
+
+            foreach (var line in lines)
+            {
+                // Parse server information
+                var serverMatch = ServerRegex.Match(line);
+                if (serverMatch.Success)
+                {
+                    serverName = serverMatch.Groups["serverName"].Value.Trim();
+                    if (serverMatch.Groups["location"].Success)
+                    {
+                        serverLocation = serverMatch.Groups["location"].Value.Trim();
+                    }
+                }
+
+                // Parse download speed
+                var downloadMatch = DownloadRegex.Match(line);
+                if (downloadMatch.Success && double.TryParse(downloadMatch.Groups["speed"].Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double parsedDownload))
+                {
+                    downloadSpeed = parsedDownload;
+                }
+
+                // Parse upload speed
+                var uploadMatch = UploadRegex.Match(line);
+                if (uploadMatch.Success && double.TryParse(uploadMatch.Groups["speed"].Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double parsedUpload))
+                {
+                    uploadSpeed = parsedUpload;
+                }
+
+                // Parse latency
+                var latencyMatch = LatencyRegex.Match(line);
+                if (latencyMatch.Success && double.TryParse(latencyMatch.Groups["latency"].Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double parsedLatency))
+                {
+                    latency = parsedLatency;
+                }
+
+                // Also try idle latency
+                var idleLatencyMatch = IdleLatencyRegex.Match(line);
+                if (idleLatencyMatch.Success && double.TryParse(idleLatencyMatch.Groups["latency"].Value.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double parsedIdleLatency))
+                {
+                    latency = parsedIdleLatency;
+                }
+            }
+
+            // Create result object
+            result.Download = new SpeedTestResult.DownloadInfo { Bandwidth = (long)(downloadSpeed * 125000) };
+            result.Upload = new SpeedTestResult.UploadInfo { Bandwidth = (long)(uploadSpeed * 125000) };
+            result.Ping = new SpeedTestResult.PingInfo { Latency = latency };
+            result.Server = new SpeedTestResult.ServerInfo 
+            { 
+                Name = serverName, 
+                Location = !string.IsNullOrEmpty(serverLocation) ? serverLocation : serverName 
+            };
+            result.UsingCliValues = true;
+
+            return result;
         }
 
         private void SaveTestResult(SpeedTestResult result)
