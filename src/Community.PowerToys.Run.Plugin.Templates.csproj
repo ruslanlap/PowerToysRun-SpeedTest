@@ -13,7 +13,7 @@
     </PackageReleaseNotes>
     <PackageId>Community.PowerToys.Run.Plugin.Templates</PackageId>
     <PackageProjectUrl>https://github.com/hlaueriksson/Community.PowerToys.Run.Plugin.Templates</PackageProjectUrl>
-    <PackageIcon>icon.png</PackageIcon>
+    <PackageIcon>../assets/icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>plugin;plugins;powertoys;microsoft-powertoys;powertoys-run;powertoys-run-plugin</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -28,7 +28,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\assets\icon.png" Pack="true" PackagePath="\" />
     <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
