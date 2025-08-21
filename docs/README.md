@@ -13,7 +13,7 @@
   </a>
   <img src="https://img.shields.io/maintenance/yes/2025" alt="Maintenance">
   <img src="https://img.shields.io/badge/C%23-.NET-512BD4" alt="C# .NET">
-  <img src="https://img.shields.io/badge/version-v1.0.5-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-v1.0.6-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/stargazers">
     <img src="https://img.shields.io/github/stars/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub stars">
@@ -40,10 +40,10 @@
 </div>
 
 <div align="center">
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-x64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.6/SpeedTest-1.0.5-x64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-x64-blue?style=for-the-badge&logo=github" alt="Download x64">
   </a>
-  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-ARM64.zip">
+  <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.6/SpeedTest-1.0.5-ARM64.zip">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-ARM64-blue?style=for-the-badge&logo=github" alt="Download ARM64">
   </a>
 </div>
@@ -91,8 +91,8 @@
 
 ### Steps
 1. Download the appropriate ZIP file for your platform:
-   - [x64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-x64.zip)
-   - [ARM64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-ARM64.zip)
+   - [x64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.6/SpeedTest-1.0.5-x64.zip)
+   - [ARM64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.6/SpeedTest-1.0.5-ARM64.zip)
 
 2. Extract the ZIP file to your PowerToys plugins directory:
    ```
@@ -116,7 +116,7 @@
 - Configure clipboard settings in PowerToys settings
 - Click the result URL to view/share your result online
 
-## 📢 What's New in v1.0.5
+## 📢 What's New in v1.0.6
 
 - **🎨 Beautiful New Loading Animation** - Classic "running dots" spinner like Speedtest.net
 - **📱 Enhanced User Interface** - Improved window positioning and better text layout
