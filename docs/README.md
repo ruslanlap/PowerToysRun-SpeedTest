@@ -1,14 +1,9 @@
-# 🚀 PowerToys Run: SpeedTest Plugin
+# PowerToys Run: SpeedTest Plugin
 
 <div align="center">
-  <img src="../SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="800">
-  <img src="../SpeedTest/data/gif presentation.gif" alt="Presentation GIF" width="800">
-  <p align="center">
-    <img src="../SpeedTest/data/logo.png" alt="SpeedTest Icon" width="128" height="128">
-  </p>
-  <h1>⚡ SpeedTest for PowerToys Run ⚡</h1>
-  <h3>Run internet speed tests directly from PowerToys Run</h3>
-
+  <img src="../SpeedTest/data/logo.png" alt="SpeedTest Icon" width="128" height="128">
+  <h3>⚡ Run internet speed tests directly from PowerToys Run ⚡</h3>
+  
   <!-- Badges -->
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/actions/workflows/build-and-release.yml">
     <img src="https://github.com/ruslanlap/PowerToysRun-SpeedTest/actions/workflows/build-and-release.yml/badge.svg" alt="Build Status">
@@ -38,7 +33,8 @@
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platform">
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
-    <a href="https://github.com/hlaueriksson/awesome-powertoys-run-plugins">
+  </a>
+  <a href="https://github.com/hlaueriksson/awesome-powertoys-run-plugins">
     <img src="https://awesome.re/mentioned-badge.svg" alt="Mentioned in Awesome PowerToys Run Plugins">
   </a>
 </div>
@@ -52,285 +48,80 @@
   </a>
 </div>
 
-<br>
+## Overview
 
----
-## 📢 Latest Release Notes (v1.0.5)
+Check your internet speed instantly from PowerToys Run. Just type `spt` and hit Enter—no browser required!
 
-### What's New? 🚀
-- **🎨 Beautiful New Loading Animation** - Classic "running dots" spinner like Speedtest.net
-- **📱 Enhanced User Interface** - Improved window positioning and better text layout
-- **⚡ Window Flash Notification** - Results window now flashes to grab attention when complete
+**Features:**
+- ⚡ One-command speed test from PowerToys Run
+- 📊 Shows download, upload, ping, server info, and shareable URL
+- 🎨 Beautiful WPF UI with real-time progress and loading animation
+- 📋 Optional clipboard integration (configurable)
+- 🌙 Theme-aware (adapts to dark/light mode)
 
-## 📊 Download Statistics
+## Demo
 
 <div align="center">
-  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/total?style=for-the-badge&label=Total%20Downloads" height="42" alt="Total Downloads">
-  <img src="https://img.shields.io/github/downloads/ruslanlap/PowerToysRun-SpeedTest/latest/total?style=for-the-badge&label=Latest%20Release" height="42"  alt="Latest Release Downloads">
+  <img src="../SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="600">
 </div>
 
+## Installation
 
-## ⚡ Quick Start
+**Requirements:** Windows 10/11 + PowerToys
 
-1. Install PowerToys (if not already installed)
-2. Download the SpeedTest plugin (x64 or ARM64)
-3. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
-4. Restart PowerToys
-5. Press `Alt+Space`, type `spt`, and hit Enter!
-6. Configure clipboard settings in PowerToys settings if needed
+1. Download the ZIP for your platform ([x64](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-x64.zip) | [ARM64](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-ARM64.zip))
+2. Extract to `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
+3. Restart PowerToys
+4. Press `Alt+Space`, type `spt`, and hit Enter!
 
----
+## Usage
 
-## 📋 Table of Contents
-- [📝 Overview](#-overview)
-- [✨ Features](#-features)
-- [🎬 Demo](#-demo)
-- [⚡ Easy Install](#-easy-install)
-- [🚀 Usage](#-usage)
-- [📁 Data Folder](#-data-folder)
-- [🛠️ Building from Source](#️-building-from-source)
-- [📊 Project Structure](#-project-structure)
-- [🤝 Contributing](#-contributing)
-- [❓ FAQ](#-faq)
-- [☕ Support](#-support)
-- [📄 License](#-license)
-- [🙏 Acknowledgements](#-acknowledgements)
-- [🛠️ Troubleshooting](#-troubleshooting)
-- [🔒 Security & Privacy](#-security--privacy)
-- [🧑‍💻 Tech Stack](#-tech-stack)
-- [📝 Changelog](#-changelog)
-- [🌐 Localization](#-localization)
-- [📸 Screenshots](#-screenshots)
-- [📋 Release Notes](#-release-notes)
-
----
-
-## 📢 Previous Release Notes (v1.0.4)
-
-### What's New? 🎉
-
-- **Real-time CLI output in UI**
-- **Correct speedtest CLI arguments**
-- **No more hardcoded demo data**
-- **Improved error handling**
-- **Live progress and real results!**
-
-## 📢 Previous Release Notes (v1.0.3)
-
-### What's New? 🎉
-
-- **Optional Clipboard Integration** 📋
-  - Now you can choose whether to auto-copy results
-  - Disabled by default for better security
-  - Easy to toggle in PowerToys settings
-
-- **Enhanced UI** 🎨
-  - Modern button styling with better padding
-  - Consistent sizing and spacing
-  - Improved visual feedback
-  - Sleek animations on hover
-
-- **Stability Improvements** 🛡️
-  - Fixed notification spam on PowerToys exit
-  - Better error handling
-  - Improved resource cleanup
-
-## 📝 Overview
-
-**SpeedTest** is a PowerToys Run plugin that lets you check your internet speed instantly from your keyboard. Just type `spt` in PowerToys Run and launch a test—no browser required!
-
-- **Plugin ID:** `5A0F7ED1D3F24B0A900732839D0E43DB`
-- **Action Keyword:** `spt` or change to `speedtest`
-- **Platform:** Windows 10/11 (x64, ARM64)
-- **Tech:** C#/.NET, WPF, PowerToys Run API
-
-## ✨ Features
-- ⚡ One-command internet speed test from PowerToys Run
-- 📊 Shows download, upload, ping, server info, and shareable result URL
-- 🖼️ Beautiful modern WPF UI with animated loading and real-time progress
-- 🎨 Classic "running dots" loading animation like Speedtest.net
-- 🎨 Theme-aware (dark/light icons, adapts to system theme)
-- �� Optional clipboard integration (configurable in settings)
-- 🎯 Enhanced UI with modern button styling
-- 🛡️ Improved stability and error handling
-- 🔧 Persistent user settings
-- 📝 Copy/share results instantly (optional)
-- 🛠️ Robust error handling and informative messages
-- 🧪 Automated tests and CI/CD (GitHub Actions)
-
-## 🎬 Demo
-<div align="center">
-  <img src="../SpeedTest/data/demo1.png" width="350" alt="Demo 1">
-  <img src="../SpeedTest/data/demo2.png" width="350" alt="Demo 2">
-  <img src="../SpeedTest/data/demo3.png" width="350" alt="Demo 3">
-</div>
-
-## ⚡ Installation
-
-### Prerequisites
-- Windows 10/11
-- PowerToys installed and running
-
-### Steps
-1. Download the appropriate ZIP file for your platform:
-   - [x64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-x64.zip)
-   - [ARM64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-ARM64.zip)
-
-2. Extract the ZIP file to your PowerToys plugins directory:
-   ```
-   %LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\
-   ```
-   
-3. Restart PowerToys completely:
-   - Right-click PowerToys in system tray → Exit
-   - Start PowerToys again
-
-4. Test the plugin:
-   - Press `Alt+Space` to open PowerToys Run
-   - Type `spt` and hit Enter
-   - Configure clipboard settings in PowerToys settings if needed
-
-## 🚀 Usage     
-- Open PowerToys Run (`Alt+Space`)    
-- Type `spt` and select `Run Speed Test`
-- Enjoy the beautiful loading animation and view real-time progress
-- Results window will flash when complete to get your attention
+- Open PowerToys Run (`Alt+Space`)
+- Type `spt` and select "Run Speed Test"
+- View real-time progress with animated loading
+- Results window flashes when complete
+- Click the URL to share your results online
 - Configure clipboard settings in PowerToys settings
-- Click the result URL to view/share your result online
 
-## 📁 Data Folder
-The [`SpeedTest/data`](../SpeedTest/data/) folder contains:
-- Demo GIFs and screenshots for documentation
-- Plugin and theme icons (`logo.png`, `speedtest.dark.png`, `speedtest.light.png`)
+## What's New in v1.0.5
 
-Feel free to use these assets in your own documentation or to customize the plugin's appearance.
+- 🎨 Beautiful new loading animation (classic "running dots" like Speedtest.net)
+- 📱 Enhanced UI with improved window positioning
+- ⚡ Window flash notification when test completes
+- 🔧 Better error handling and stability
 
-## 🛠️ Building from Source
-- Requires .NET 6+ SDK and Windows 10/11
-- Clone the repo and open `Templates.sln` in Visual Studio
-- Build the `SpeedTest` project (x64 or ARM64)
-- Output: `SpeedTest-x64.zip` or `SpeedTest-ARM64.zip` in the root directory
+## Building from Source
 
-## 📊 Project Structure
-```
-SpeedTest/
-├── Community.PowerToys.Run.Plugin.SpeedTest/    # Plugin source code
-├── data/                                       # Demo assets and icons
-├── tests/                                      # Unit & integration tests
-├── Publish/                                    # Build output
-├── CHANGELOG.md                                # Version history
-├── CONTRIBUTE.md                               # Contributing guidelines
-├── RELEASE.md                                  # Release notes
-├── ...
+Requirements: .NET 6+ SDK, Windows 10/11
+
+```bash
+git clone https://github.com/ruslanlap/PowerToysRun-SpeedTest.git
+cd PowerToysRun-SpeedTest
+# Open Templates.sln in Visual Studio and build
 ```
 
-## 🤝 Contributing
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
+## FAQ
 
-### Contributors
-- [ruslanlap](https://github.com/ruslanlap) - Project creator and maintainer
+**Q: How do I enable/disable clipboard copying?**  
+A: Go to PowerToys settings → Plugins → SpeedTest → Toggle clipboard option
 
-## ❓ FAQ
-<details>
-<summary><b>How do I change the plugin's theme?</b></summary>
-<p>Theme adapts automatically to your system. Dark and light icons are included.</p>
-</details>
-<details>
-<summary><b>Where are my results stored?</b></summary>
-<p>Results are not stored persistently; you can copy or share them after each test.</p>
-</details>
-<details>
-<summary><b>How do I enable/disable clipboard copying?</b></summary>
-<p>Go to PowerToys settings, find the SpeedTest plugin section, and toggle the clipboard option.</p>
-</details>
-<details>
-<summary><b>Does it work offline?</b></summary>
-<p>No, an internet connection is required to run speed tests.</p>
-</details>
-<details>
-<summary><b>Can I choose a specific server?</b></summary>
-<p>Not yet, but server selection support is planned for future releases.</p>
-</details>
+**Q: Can I choose a specific server?**  
+A: Not yet, but server selection is planned for future releases
 
-## ☕ Support
-Enjoying SpeedTest? ☕ Buy me a coffee to support development:
+**Q: Does it work offline?**  
+A: No, an internet connection is required
 
-[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-☕️-FFDD00?style=for-the-badge&logo=buy-me-a-coffee)](https://ruslanlap.github.io/ruslanlap_buymeacoffe/)
+## Contributing
 
-## 📄 License
-MIT License. See [LICENSE](LICENSE).
+Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting PRs.
 
-## 🙏 Acknowledgements
-- [Microsoft PowerToys](https://github.com/microsoft/PowerToys) team
-- [Ookla Speedtest CLI](https://www.speedtest.net/apps/cli)
-- All contributors and users!
+## Support
 
----
+Like this plugin? ☕ [Buy me a coffee](https://ruslanlap.github.io/ruslanlap_buymeacoffe/)
 
-## 🛠️ Troubleshooting
+## License
 
-- **Plugin does not appear in PowerToys Run**  
-  Make sure you extracted the plugin to the correct folder and restarted PowerToys.
-- **Icons do not update**  
-  Try deleting the old plugin folder before copying the new version.
-- **Speed test does not run**  
-  Ensure you have an active internet connection and permission to run speedtest.exe.
-- **Clipboard copying not working**  
-  Check if clipboard copying is enabled in PowerToys settings.
-
----
-
-## 🔒 Security & Privacy
-
-- The plugin does not store your test history
-- All tests are performed locally using the official speedtest CLI
-- No third-party APIs or data collection
-- Optional clipboard integration (disabled by default)
-
----
-
-## 🧑‍💻 Tech Stack
-
-- C# / .NET 9.0
-- WPF (UI)
-- PowerToys Run API
-- GitHub Actions (CI/CD)
-- JSON for settings storage
-
----
-
-## 📝 Changelog
-
-See the [CHANGELOG.md](CHANGELOG.md) for detailed version history and the [RELEASE.md](RELEASE.md) for latest release notes.
-
-## 📋 Release Notes
-
-- [📋 Release Notes v1.0.3](RELEASE_NOTES_v1.0.3.md) - Latest release with all GitHub issues resolved
-- [📋 GitHub Release Description](GITHUB_RELEASE_DESCRIPTION.md) - Concise release description for GitHub
-
----
-
-## 🌐 Localization
-
-Currently, the plugin UI is in English. Localization support is planned for future releases.
-
----
-
-## 📸 Screenshots
-<div align="center">
-  <figure>
-    <img src="../SpeedTest/data/demo1.png" width="350" alt="Demo: Running Speed Test">
-    <figcaption>Running Speed Test</figcaption>
-  </figure>
-  <figure>
-    <img src="../SpeedTest/data/demo2.png" width="350" alt="Demo: Results Window">
-    <figcaption>Results Window</figcaption>
-  </figure>
-  <figure>
-    <img src="../SpeedTest/data/demo3.png" width="350" alt="Demo: Copy/Share Results">
-    <figcaption>Copy/Share Results</figcaption>
-  </figure>
-</div>
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
