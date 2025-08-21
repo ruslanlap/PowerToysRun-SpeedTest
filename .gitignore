@@ -8,7 +8,6 @@ remakatag.sh
 *.suo
 *.user
 *.userosscache
-*.sln.docstates
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -406,5 +405,3 @@ pack.bat
 install-local.bat
 dotnet-install.sh
 
-# JetBrains Rider
-*.sln.iml
