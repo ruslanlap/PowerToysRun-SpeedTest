@@ -1,10 +1,10 @@
 # 🚀 PowerToys Run: SpeedTest Plugin
 
 <div align="center">
-  <img src="SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="800">
-  <img src="SpeedTest/data/gif presentation.gif" alt="Presentation GIF" width="800">
+  <img src="../SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="800">
+  <img src="../SpeedTest/data/gif presentation.gif" alt="Presentation GIF" width="800">
   <p align="center">
-    <img src="SpeedTest/data/logo.png" alt="SpeedTest Icon" width="128" height="128">
+    <img src="../SpeedTest/data/logo.png" alt="SpeedTest Icon" width="128" height="128">
   </p>
   <h1>⚡ SpeedTest for PowerToys Run ⚡</h1>
   <h3>Run internet speed tests directly from PowerToys Run</h3>
@@ -160,9 +160,9 @@
 
 ## 🎬 Demo
 <div align="center">
-  <img src="SpeedTest/data/demo1.png" width="350" alt="Demo 1">
-  <img src="SpeedTest/data/demo2.png" width="350" alt="Demo 2">
-  <img src="SpeedTest/data/demo3.png" width="350" alt="Demo 3">
+  <img src="../SpeedTest/data/demo1.png" width="350" alt="Demo 1">
+  <img src="../SpeedTest/data/demo2.png" width="350" alt="Demo 2">
+  <img src="../SpeedTest/data/demo3.png" width="350" alt="Demo 3">
 </div>
 
 ## ⚡ Installation
@@ -199,7 +199,7 @@
 - Click the result URL to view/share your result online
 
 ## 📁 Data Folder
-The [`SpeedTest/data`](SpeedTest/data/) folder contains:
+The [`SpeedTest/data`](../SpeedTest/data/) folder contains:
 - Demo GIFs and screenshots for documentation
 - Plugin and theme icons (`logo.png`, `speedtest.dark.png`, `speedtest.light.png`)
 
@@ -225,7 +225,7 @@ SpeedTest/
 ```
 
 ## 🤝 Contributing
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTE.md) before submitting a pull request.
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
 
 ### Contributors
 - [ruslanlap](https://github.com/ruslanlap) - Project creator and maintainer
@@ -319,15 +319,15 @@ Currently, the plugin UI is in English. Localization support is planned for futu
 ## 📸 Screenshots
 <div align="center">
   <figure>
-    <img src="SpeedTest/data/demo1.png" width="350" alt="Demo: Running Speed Test">
+    <img src="../SpeedTest/data/demo1.png" width="350" alt="Demo: Running Speed Test">
     <figcaption>Running Speed Test</figcaption>
   </figure>
   <figure>
-    <img src="SpeedTest/data/demo2.png" width="350" alt="Demo: Results Window">
+    <img src="../SpeedTest/data/demo2.png" width="350" alt="Demo: Results Window">
     <figcaption>Results Window</figcaption>
   </figure>
   <figure>
-    <img src="SpeedTest/data/demo3.png" width="350" alt="Demo: Copy/Share Results">
+    <img src="../SpeedTest/data/demo3.png" width="350" alt="Demo: Copy/Share Results">
     <figcaption>Copy/Share Results</figcaption>
   </figure>
 </div>
