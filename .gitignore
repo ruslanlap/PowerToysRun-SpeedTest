@@ -401,5 +401,10 @@ release-artifacts/
 *.zip.sha256
 SpeedTest-*.zip
 
+# Local helper scripts (kept locally, not tracked)
+pack.bat
+install-local.bat
+dotnet-install.sh
+
 # JetBrains Rider
 *.sln.iml
