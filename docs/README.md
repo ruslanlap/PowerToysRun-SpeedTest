@@ -109,10 +109,11 @@
    - Configure clipboard settings in PowerToys settings if needed
 
 ## 🚀 Usage     
-- Open PowerToys Run (`Alt+Space`)    
+- Open PowerToys Run (`Alt+Space`)
 - Type `spt` and select `Run Speed Test`
 - Enjoy the beautiful loading animation and view real-time progress
 - Results window will flash when complete to get your attention
+- Press `Esc` at any time to cancel the test or close the results window
 - Configure clipboard settings in PowerToys settings
 - Click the result URL to view/share your result online
 

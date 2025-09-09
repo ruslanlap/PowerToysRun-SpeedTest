@@ -7,6 +7,7 @@ using Microsoft.Win32; // For Registry
 using System;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
+using System.Windows.Input;
 
 namespace Community.PowerToys.Run.Plugin.SpeedTest
 {
@@ -30,12 +31,22 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 
             // Flash the window when it's loaded
             this.Loaded += (s, e) => FlashWindow(new WindowInteropHelper(this).Handle, true);
+            PreviewKeyDown += ResultsWindow_PreviewKeyDown;
 
             #if DEBUG
             // Log the result data for debugging purposes.
             Debug.WriteLine("ResultsWindow: DataContext set. Result Object Debug Info:");
             Debug.WriteLine(_result.GetDebugInfo()); // Assumes GetDebugInfo() is a comprehensive string representation
             #endif
+        }
+
+        private void ResultsWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+                e.Handled = true;
+            }
         }
 
         private void ApplyTheme()
