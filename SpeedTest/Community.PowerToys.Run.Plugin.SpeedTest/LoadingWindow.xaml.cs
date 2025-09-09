@@ -7,6 +7,8 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Threading;
+using System.Windows.Input;
 
 namespace Community.PowerToys.Run.Plugin.SpeedTest
 {
@@ -15,6 +17,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         private TestStage _currentStage = TestStage.Connecting;
         private DispatcherTimer _dotAnimationTimer;
         private bool _isCompleted = false;
+        private readonly CancellationTokenSource _cancellationTokenSource;
 
         public enum TestStage
         {
@@ -26,10 +29,22 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             Error = 5
         }
 
-        public LoadingWindow()
+        public LoadingWindow(CancellationTokenSource cancellationTokenSource = null)
         {
             InitializeComponent();
+            _cancellationTokenSource = cancellationTokenSource;
             Loaded += LoadingWindow_Loaded;
+            PreviewKeyDown += LoadingWindow_PreviewKeyDown;
+        }
+
+        private void LoadingWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                _cancellationTokenSource?.Cancel();
+                CloseWithAnimation();
+                e.Handled = true;
+            }
         }
 
         private void LoadingWindow_Loaded(object sender, RoutedEventArgs e)

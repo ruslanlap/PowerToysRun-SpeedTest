@@ -335,7 +335,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             LoadingWindow loadingWindow = null;
             Application.Current.Dispatcher.Invoke(() =>
             {
-                loadingWindow = new LoadingWindow();
+                loadingWindow = new LoadingWindow(_cancellationTokenSource);
                 _currentLoadingWindow = loadingWindow;
                 loadingWindow.Show();
                 loadingWindow.UpdateStage(LoadingWindow.TestStage.Connecting);
@@ -349,7 +349,13 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
 
                 if (token.IsCancellationRequested)
                 {
-                    Application.Current.Dispatcher.Invoke(() => loadingWindow?.CloseWithAnimation());
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (loadingWindow?.IsVisible == true)
+                        {
+                            loadingWindow.CloseWithAnimation();
+                        }
+                    });
                     if (_showNotifications)
                     {
                         _context.API.ShowMsg("Speed Test", "🛑 Test was canceled", _iconPath);
@@ -361,7 +367,10 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        loadingWindow?.CloseWithAnimation();
+                        if (loadingWindow?.IsVisible == true)
+                        {
+                            loadingWindow.CloseWithAnimation();
+                        }
 
                         try
                         {
@@ -388,7 +397,13 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             }
             catch (OperationCanceledException)
             {
-                Application.Current.Dispatcher.Invoke(() => loadingWindow?.CloseWithAnimation());
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (loadingWindow?.IsVisible == true)
+                    {
+                        loadingWindow.CloseWithAnimation();
+                    }
+                });
                 if (_showNotifications)
                 {
                     _context.API.ShowMsg("Speed Test", "🛑 Test was canceled", _iconPath);
@@ -404,11 +419,14 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     {
                         Interval = TimeSpan.FromSeconds(3)
                     };
-                    timer.Tick += (s, e) =>
-                    {
-                        timer.Stop();
-                        loadingWindow?.CloseWithAnimation();
-                    };
+                        timer.Tick += (s, e) =>
+                        {
+                            timer.Stop();
+                            if (loadingWindow?.IsVisible == true)
+                            {
+                                loadingWindow.CloseWithAnimation();
+                            }
+                        };
                     timer.Start();
                 });
 
@@ -458,6 +476,19 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             };
 
             using var process = new Process { StartInfo = psi };
+            using var _ = token.Register(() =>
+            {
+                try
+                {
+                    if (!process.HasExited)
+                    {
+                        process.Kill(true);
+                    }
+                }
+                catch
+                {
+                }
+            });
 
             process.OutputDataReceived += (sender, e) =>
             {
