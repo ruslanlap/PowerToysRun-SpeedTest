@@ -1,17 +1,16 @@
-# 🚀 PowerToys Run SpeedTest v1.0.5
+# 🚀 PowerToys Run SpeedTest v1.0.7
 
-## 🎨 Beautiful New Loading Experience
+## ⌨️ Improved Controls & Performance
 
-This release brings a **stunning visual overhaul** to the speed test loading experience, making it feel just like the classic Speedtest.net interface!
+This release focuses on **improved user controls and performance optimizations** to make the SpeedTest plugin even more responsive and user-friendly!
 
 ### ✨ What's New?
 
-- **🎯 Classic "Running Dots" Animation** - Beautiful circular loading spinner with animated dots that chase each other around the circle
-- **📱 Enhanced User Interface** - Completely redesigned loading window with better text positioning and layout
-- **⚡ Window Flash Notifications** - Results window now flashes in the taskbar when your speed test is complete
-- **🎯 Smart Window Positioning** - Results window always appears centered on your screen (no more random corners!)
-- **🔧 Optimized Performance** - Smoother, faster animations with improved timing and responsiveness
-- **💫 Dynamic Status Updates** - Center text changes based on test progress: "Connecting to server..." → "Testing latency..." → "Testing download..." → "Testing upload..." → "Complete!"
+- **⌨️ Improved Controls** - Press `Esc` key to cancel a running test or close results window
+- **🛡️ Better Error Handling** - Improved handling of network connectivity issues
+- **⚡ Optimized Performance** - Reduced resource usage during speed tests
+- **🖱️ Enhanced UI Responsiveness** - More responsive interface during long-running tests
+- **📝 Clear User Feedback** - Better feedback when test is canceled by user
 
 ### 🛠️ Technical Improvements
 
@@ -24,8 +23,8 @@ This release brings a **stunning visual overhaul** to the speed test loading exp
 ### 📥 Installation
 
 1. Download the appropriate version for your system:
-   - **[SpeedTest-1.0.5-x64.zip](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-x64.zip)** (Intel/AMD 64-bit)
-   - **[SpeedTest-1.0.5-ARM64.zip](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.5/SpeedTest-1.0.5-ARM64.zip)** (ARM 64-bit)
+   - **[SpeedTest-1.0.7-x64.zip](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.7/SpeedTest-1.0.7-x64.zip)** (Intel/AMD 64-bit)
+   - **[SpeedTest-1.0.7-ARM64.zip](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.7/SpeedTest-1.0.7-ARM64.zip)** (ARM 64-bit)
 
 2. Extract to: `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 3. Restart PowerToys

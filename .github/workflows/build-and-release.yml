@@ -215,21 +215,17 @@ jobs:
 
           ## What's New in v${VERSION}
 
-          ### 🐛 Resolved All Open Issues:
-          - **Issue #1**: Fixed plugin initialization failures - added missing PowerToys.Settings.UI.Library namespace
-          - **Issue #2**: Implemented complete settings framework with clipboard auto-copy option  
-          - **Issue #3**: Resolved post-test errors by simplifying loading animations
-
           ### ✨ New Features:
-          - Settings panel in PowerToys UI for "Copy to clipboard automatically"
-          - Simplified single-circle loading animation (60% less CPU usage)
-          - Enhanced error handling and stability improvements
+          - **Improved Controls** - Press `Esc` key to cancel a running test or close results window
+          - **Better Error Handling** - Improved handling of network connectivity issues
+          - **Clear User Feedback** - Better feedback when test is canceled by user
 
-          ### 🔧 Technical Updates:
-          - Full ISettingProvider interface implementation
-          - Better PowerToys framework compatibility
-          - Persistent settings through JSON configuration
-          - Optimized resource management and cleanup
+          ### 🔧 Technical Improvements:
+          - Optimized resource usage during speed tests
+          - Enhanced UI responsiveness during long-running tests
+          - Improved error handling for network connectivity issues
+          - Better cleanup of resources when tests are canceled
+          - More responsive interface during all test phases
 
           ## Installation
 

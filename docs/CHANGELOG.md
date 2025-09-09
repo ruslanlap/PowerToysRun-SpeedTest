@@ -7,8 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] - 2025-09-09
+
 ### Added
 - Pressing `Esc` now cancels a running speed test or closes the results window
+- Improved error handling for network connectivity issues
+- Better feedback when test is canceled by user
+
+### Changed
+- Optimized resource usage during speed tests
+- Enhanced UI responsiveness during long-running tests
+
+## [1.0.6] - 2025-01-15
+
+### Added
+- Beautiful new loading animation with classic "running dots" spinner (like Speedtest.net)
+- Window flash notification when speed test results are ready
+- Dynamic center text that updates based on test stage (Connecting → Testing latency → Testing download → Testing upload → Complete)
+- Enhanced window positioning - results window now centers on screen
+- Optimized animation timing for smoother visual experience
+
+### Changed
+- Improved loading window UI with better text layout and positioning
+- Enhanced animation performance with faster, more responsive dot animations
+- Better visual feedback during different test phases
+- Refined window management and positioning logic
+
+### Fixed
+- Fixed animation resource conflicts that caused application crashes
+- Resolved text overlap issues in loading window
+- Improved window positioning consistency
+- Fixed animation cleanup on window close
 
 ## [1.0.5] - 2025-01-14
 
