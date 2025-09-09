@@ -1,7 +1,7 @@
 # PowerToys Run: SpeedTest Plugin
 
 <div align="center">
-  <img src="../SpeedTest/data/logo.png" alt="SpeedTest Icon" width="128" height="128">
+  <img src="SpeedTest/data/logo.png" alt="SpeedTest Icon" width="128" height="128">
   <h3>⚡ Run internet speed tests directly from PowerToys Run ⚡</h3>
   
   <!-- Badges -->
@@ -79,8 +79,8 @@
 
 ## 🎬 Demo
 <div align="center">
-  <img src="../SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="800">
-  <img src="../SpeedTest/data/gif presentation.gif" alt="Presentation GIF" width="800">
+  <img src="SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="800">
+  <img src="SpeedTest/data/gif presentation.gif" alt="Presentation GIF" width="800">
 </div>
 
 ## ⚡ Installation
@@ -199,9 +199,9 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 ## 📸 Screenshots
 <div align="center">
-  <img src="../SpeedTest/data/demo1.png" width="350" alt="Demo: Running Speed Test">
-  <img src="../SpeedTest/data/demo2.png" width="350" alt="Demo: Results Window">
-  <img src="../SpeedTest/data/demo3.png" width="350" alt="Demo: Copy/Share Results">
+  <img src="SpeedTest/data/demo1.png" width="350" alt="Demo: Running Speed Test">
+  <img src="SpeedTest/data/demo2.png" width="350" alt="Demo: Results Window">
+  <img src="SpeedTest/data/demo3.png" width="350" alt="Demo: Copy/Share Results">
 </div>
 
 ## ☕ Support
