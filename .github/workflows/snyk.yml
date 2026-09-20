@@ -19,7 +19,7 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore Templates.sln
 
       - name: Install Snyk
         run: npm install -g snyk
@@ -28,7 +28,25 @@ jobs:
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Test
-        run: snyk test --all-projects
+        shell: pwsh
+        run: |
+          $projects = @(
+            'src/Community.PowerToys.Run.Plugin.Templates.csproj'
+            'tests/Community.PowerToys.Run.Plugin.Templates.Tests.csproj'
+          )
+
+          foreach ($project in $projects) {
+            snyk test --file=$project --package-manager=nuget
+          }
 
       - name: Monitor
-        run: snyk monitor --all-projects
+        shell: pwsh
+        run: |
+          $projects = @(
+            'src/Community.PowerToys.Run.Plugin.Templates.csproj'
+            'tests/Community.PowerToys.Run.Plugin.Templates.Tests.csproj'
+          )
+
+          foreach ($project in $projects) {
+            snyk monitor --file=$project --package-manager=nuget
+          }
