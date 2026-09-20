@@ -9,6 +9,10 @@ on:
 jobs:
   security:
     runs-on: windows-latest
+    env:
+      SNYK_PROJECTS: |
+        src/Community.PowerToys.Run.Plugin.Templates.csproj
+        tests/Community.PowerToys.Run.Plugin.Templates.Tests.csproj
 
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +23,7 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore Templates.sln
 
       - name: Install Snyk
         run: npm install -g snyk
@@ -27,8 +31,21 @@ jobs:
       - name: Authenticate
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      - name: Test
-        run: snyk test --all-projects
+      - name: Test and monitor
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $projects = $env:SNYK_PROJECTS -split "\r?\n" |
+            Where-Object { $_ }
 
-      - name: Monitor
-        run: snyk monitor --all-projects
+          foreach ($project in $projects) {
+            snyk test --file=$project --package-manager=nuget
+            if ($LASTEXITCODE -ne 0) {
+              exit $LASTEXITCODE
+            }
+
+            snyk monitor --file=$project --package-manager=nuget
+            if ($LASTEXITCODE -ne 0) {
+              exit $LASTEXITCODE
+            }
+          }
