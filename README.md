@@ -11,9 +11,9 @@
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/latest">
     <img src="https://img.shields.io/github/v/release/ruslanlap/PowerToysRun-SpeedTest?label=latest" alt="Latest Release">
   </a>
-  <img src="https://img.shields.io/maintenance/yes/2025" alt="Maintenance">
+  <img src="https://img.shields.io/maintenance/yes/2026" alt="Maintenance">
   <img src="https://img.shields.io/badge/C%23-.NET-512BD4" alt="C# .NET">
-  <img src="https://img.shields.io/badge/version-v1.0.7-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-v1.1.0-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
   <a href="https://github.com/ruslanlap/PowerToysRun-SpeedTest/stargazers">
     <img src="https://img.shields.io/github/stars/ruslanlap/PowerToysRun-SpeedTest" alt="GitHub stars">
@@ -91,8 +91,8 @@
 
 ### Steps
 1. Download the appropriate ZIP file for your platform:
-   - [x64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.7/SpeedTest-1.0.7-x64.zip)
-   - [ARM64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.0.7/SpeedTest-1.0.7-ARM64.zip)
+   - [x64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.1.0/SpeedTest-1.1.0-x64.zip)
+   - [ARM64 version](https://github.com/ruslanlap/PowerToysRun-SpeedTest/releases/download/v1.1.0/SpeedTest-1.1.0-ARM64.zip)
 
 2. Extract the ZIP file to your PowerToys plugins directory:
    ```
@@ -116,6 +116,14 @@
 - Press `Esc` at any time to cancel the test or close the results window
 - Configure clipboard settings in PowerToys settings
 - Click the result URL to view/share your result online
+- Type `spt last` to instantly see your last result (no re-test needed)
+- Type `spt stats` to see average / best speeds across all saved tests
+
+## 📢 What's New in v1.1.0
+
+- **🕒 Inline Last Result** — `spt last` shows your most recent test result without re-running; click to copy
+- **📈 Inline Stats** — `spt stats` shows avg/best download & upload across all saved tests
+- **🛡️ History helpers** — faster access to history data directly in the search results
 
 ## 📢 What's New in v1.0.7
 

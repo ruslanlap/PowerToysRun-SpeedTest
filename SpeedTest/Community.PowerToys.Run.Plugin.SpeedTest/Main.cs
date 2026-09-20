@@ -206,6 +206,47 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                         }
                     });
                 }
+
+                // Last result inline
+                if (_saveHistory && (string.IsNullOrEmpty(trimmedQuery) || "last".Contains(trimmedQuery)))
+                {
+                    var lastResult = GetLastHistoryEntry();
+                    if (lastResult.HasValue)
+                    {
+                        var (dl, ul, lat, ts, srv) = lastResult.Value;
+                        results.Add(new Result
+                        {
+                            Title = $"🕒 Last: ⬇️ {dl:F1} Mbps  ⬆️ {ul:F1} Mbps  📡 {lat:F0} ms",
+                            SubTitle = $"{ts:MMM dd, HH:mm}{(string.IsNullOrEmpty(srv) ? "" : $"  •  {srv}")} — Click to copy",
+                            IcoPath = _iconPath,
+                            Score = 75,
+                            Action = _ =>
+                            {
+                                Application.Current.Dispatcher.Invoke(() =>
+                                    Clipboard.SetText($"↓ {dl:F1} Mbps  ↑ {ul:F1} Mbps  {lat:F0} ms"));
+                                return true;
+                            }
+                        });
+                    }
+                }
+
+                // Stats inline
+                if (_saveHistory && (string.IsNullOrEmpty(trimmedQuery) || "stats".Contains(trimmedQuery)))
+                {
+                    var stats = GetHistoryStats();
+                    if (stats.HasValue)
+                    {
+                        var (avgDl, avgUl, bestDl, count) = stats.Value;
+                        results.Add(new Result
+                        {
+                            Title = $"📈 Stats ({count} tests): avg ⬇️ {avgDl:F1}  ⬆️ {avgUl:F1} Mbps  best ⬇️ {bestDl:F1} Mbps",
+                            SubTitle = "Aggregated from saved history",
+                            IcoPath = _iconPath,
+                            Score = 70,
+                            Action = _ => false
+                        });
+                    }
+                }
             }
 
             return results;
@@ -853,6 +894,39 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             {
                 Debug.WriteLine($"Failed to save test history: {ex.Message}");
             }
+        }
+
+        private (double dl, double ul, double lat, DateTime ts, string srv)? GetLastHistoryEntry()
+        {
+            try
+            {
+                var historyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "test_history.json");
+                if (!File.Exists(historyPath)) return null;
+                var history = JsonSerializer.Deserialize<List<JsonElement>>(File.ReadAllText(historyPath));
+                if (history == null || history.Count == 0) return null;
+                var h = history[^1];
+                return (h.GetProperty("Download").GetDouble(),
+                        h.GetProperty("Upload").GetDouble(),
+                        h.GetProperty("Latency").GetDouble(),
+                        h.GetProperty("Timestamp").GetDateTime(),
+                        h.TryGetProperty("Server", out var srv) ? srv.GetString() ?? "" : "");
+            }
+            catch { return null; }
+        }
+
+        private (double avgDl, double avgUl, double bestDl, int count)? GetHistoryStats()
+        {
+            try
+            {
+                var historyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "test_history.json");
+                if (!File.Exists(historyPath)) return null;
+                var history = JsonSerializer.Deserialize<List<JsonElement>>(File.ReadAllText(historyPath));
+                if (history == null || history.Count == 0) return null;
+                var dls = history.Select(h => h.GetProperty("Download").GetDouble()).ToList();
+                var uls = history.Select(h => h.GetProperty("Upload").GetDouble()).ToList();
+                return (dls.Average(), uls.Average(), dls.Max(), history.Count);
+            }
+            catch { return null; }
         }
 
         private void ShowTestHistory()
