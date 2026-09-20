@@ -9,6 +9,10 @@ on:
 jobs:
   security:
     runs-on: windows-latest
+    env:
+      SNYK_PROJECTS: |
+        src/Community.PowerToys.Run.Plugin.Templates.csproj
+        tests/Community.PowerToys.Run.Plugin.Templates.Tests.csproj
 
     steps:
       - uses: actions/checkout@v4
@@ -30,23 +34,27 @@ jobs:
       - name: Test
         shell: pwsh
         run: |
-          $projects = @(
-            'src/Community.PowerToys.Run.Plugin.Templates.csproj'
-            'tests/Community.PowerToys.Run.Plugin.Templates.Tests.csproj'
-          )
+          $ErrorActionPreference = 'Stop'
+          $projects = [System.Text.RegularExpressions.Regex]::Split($env:SNYK_PROJECTS.Trim(), "\r?\n") |
+            Where-Object { $_ }
 
           foreach ($project in $projects) {
             snyk test --file=$project --package-manager=nuget
+            if ($LASTEXITCODE -ne 0) {
+              exit $LASTEXITCODE
+            }
           }
 
       - name: Monitor
         shell: pwsh
         run: |
-          $projects = @(
-            'src/Community.PowerToys.Run.Plugin.Templates.csproj'
-            'tests/Community.PowerToys.Run.Plugin.Templates.Tests.csproj'
-          )
+          $ErrorActionPreference = 'Stop'
+          $projects = [System.Text.RegularExpressions.Regex]::Split($env:SNYK_PROJECTS.Trim(), "\r?\n") |
+            Where-Object { $_ }
 
           foreach ($project in $projects) {
             snyk monitor --file=$project --package-manager=nuget
+            if ($LASTEXITCODE -ne 0) {
+              exit $LASTEXITCODE
+            }
           }
