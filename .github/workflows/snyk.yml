@@ -31,11 +31,11 @@ jobs:
       - name: Authenticate
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      - name: Test
+      - name: Test and monitor
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $projects = [System.Text.RegularExpressions.Regex]::Split($env:SNYK_PROJECTS.Trim(), "\r?\n") |
+          $projects = $env:SNYK_PROJECTS -split "\r?\n" |
             Where-Object { $_ }
 
           foreach ($project in $projects) {
@@ -43,16 +43,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) {
               exit $LASTEXITCODE
             }
-          }
 
-      - name: Monitor
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $projects = [System.Text.RegularExpressions.Regex]::Split($env:SNYK_PROJECTS.Trim(), "\r?\n") |
-            Where-Object { $_ }
-
-          foreach ($project in $projects) {
             snyk monitor --file=$project --package-manager=nuget
             if ($LASTEXITCODE -ne 0) {
               exit $LASTEXITCODE
