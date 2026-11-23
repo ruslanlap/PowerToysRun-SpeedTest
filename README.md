@@ -76,12 +76,13 @@
 - 🛠️ Robust error handling and informative messages
 
 ## 🎬 Demo
-The recordings below show earlier versions of the plugin.
 
 <div align="center">
-  <img src="SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="800">
-  <img src="SpeedTest/data/gif presentation.gif" alt="Presentation GIF" width="800">
+  <img src="SpeedTest/data/omarchy-panel-live.png" alt="SpeedTest in progress: live download and upload dials, with a Cancel button" width="440">
+  <img src="SpeedTest/data/omarchy-panel-result.png" alt="Completed SpeedTest: download, upload, latency, and a Run again button in the same panel" width="440">
 </div>
+
+The new WPF panel on Windows, rendered with example measurements: **while testing** and **after completion**.
 
 ## ⚡ Installation
 
@@ -204,13 +205,6 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 ### Contributors
 - [ruslanlap](https://github.com/ruslanlap) - Project creator and maintainer
-
-## 📸 Screenshots
-<div align="center">
-  <img src="SpeedTest/data/demo1.png" width="350" alt="Demo: Running Speed Test">
-  <img src="SpeedTest/data/demo2.png" width="350" alt="Demo: Results Window">
-  <img src="SpeedTest/data/demo3.png" width="350" alt="Demo: Copy/Share Results">
-</div>
 
 ## ☕ Support
 Enjoying SpeedTest? ☕ Buy me a coffee to support development:
