@@ -1,0 +1,25 @@
+name: Capture README preview
+
+on:
+  push:
+    branches: [preview/render-omarchy-readme]
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - run: dotnet test SpeedTest/SpeedTest.sln -c Release -p:Platform=x64 --filter FullyQualifiedName~ReadmeCapture
+        env:
+          SPEEDTEST_CAPTURE_DIR: ${{ runner.temp }}/speedtest-preview
+      - uses: actions/upload-artifact@v4
+        with:
+          name: speedtest-readme-previews
+          path: ${{ runner.temp }}/speedtest-preview/*.png
+          if-no-files-found: error
