@@ -215,21 +215,11 @@ jobs:
 
           ## What's New in v${VERSION}
 
-          ### ✨ New Features:
-          - **Improved Controls** - Press `Esc` key to cancel a running test or close results window
-          - **Better Error Handling** - Improved handling of network connectivity issues
-          - **Clear User Feedback** - Better feedback when test is canceled by user
-
-          ### 🔧 Technical Improvements:
-          - Optimized resource usage during speed tests
-          - Enhanced UI responsiveness during long-running tests
-          - Improved error handling for network connectivity issues
-          - Better cleanup of resources when tests are canceled
-          - More responsive interface during all test phases
+          See the [changelog](https://github.com/ruslanlap/PowerToysRun-SpeedTest/blob/v${VERSION}/docs/CHANGELOG.md) for release changes and the [README demo](https://github.com/ruslanlap/PowerToysRun-SpeedTest/blob/v${VERSION}/README.md#-demo) for a preview.
 
           ## Installation
 
-          1. Download the ZIP file for your platform (x64 or ARM64)
+          1. Download the x64 ZIP for Windows 10/11, or the ARM64 ZIP for Windows 11 (the bundled Ookla CLI uses x64 emulation)
           2. Extract to \`%LOCALAPPDATA%\\Microsoft\\PowerToys\\PowerToys Run\\Plugins\\\`
           3. Restart PowerToys
           4. Use \`spt\` keyword to test your internet speed

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0](https://github.com/ruslanlap/PowerToysRun-SpeedTest/compare/v1.1.0...v1.2.0) - 2026-11-23
+
+### Changed
+- Replaced the loading screen with one compact Omarchy-inspired panel for live and final download and upload speeds.
+- Added Run again in the same panel. Closing the panel or pressing Esc stops a running test.
+
 ## [1.0.7] - 2025-09-09
 
 ### Added
