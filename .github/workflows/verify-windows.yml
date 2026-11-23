@@ -1,0 +1,21 @@
+name: Verify SpeedTest on Windows
+
+on:
+  pull_request:
+    paths:
+      - 'SpeedTest/**'
+      - '.github/workflows/verify-windows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - run: dotnet test SpeedTest/SpeedTest.sln -c Release -p:Platform=x64
+      - run: dotnet build SpeedTest/SpeedTest.sln -c Release -p:Platform=ARM64

@@ -29,7 +29,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         private readonly string _cliPath;
         private string _iconPath;
         private CancellationTokenSource _cancellationTokenSource;
-        private LoadingWindow _currentLoadingWindow;
+        private SpeedTestPanel _panel;
 
         // Settings
         private bool _copyToClipboard = false;
@@ -49,9 +49,6 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
         private static readonly Regex LatencyRegex = new Regex(@"(Ping|Latency):?\s*(?<latency>\d+[\.,]?\d*)\s*ms", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex DownloadRegex = new Regex(@"Download:?\s*(?<speed>\d+[\.,]?\d*)\s*(Mbit/s|Mbps)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex UploadRegex = new Regex(@"Upload:?\s*(?<speed>\d+[\.,]?\d*)\s*(Mbit/s|Mbps)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex ConnectingRegex = new Regex(@"(Connecting to|Selecting server|Testing from|Retrieving speedtest.net configuration)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex TestingRegex = new Regex(@"Testing (download|upload)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex TestProgressRegex = new Regex(@"Testing (download|upload) speed", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex IdleLatencyRegex = new Regex(@"Idle Latency:?\s*(?<latency>\d+[\.,]?\d*)\s*ms", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public Main()
@@ -133,10 +130,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     Score = 100,
                     Action = _ => 
                     {
-                        if (_currentLoadingWindow != null)
-                        {
-                            _currentLoadingWindow.Activate();
-                        }
+                        _panel?.Activate();
                         return false;
                     }
                 });
@@ -163,12 +157,12 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 results.Add(new Result
                 {
                     Title = "🚀 Run Speed Test",
-                    SubTitle = "Test your internet connection speed with beautiful real-time UI",
+                    SubTitle = "Watch live download and upload speeds",
                     IcoPath = _iconPath,
                     Score = 100,
                     Action = _ =>
                     {
-                        Task.Run(async () => await RunSpeedTestAsync());
+                        Application.Current.Dispatcher.InvokeAsync(OpenSpeedTestPanel);
                         return true;
                     }
                 });
@@ -184,7 +178,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                         Score = 90,
                         Action = _ =>
                         {
-                            Task.Run(async () => await RunQuickSpeedTestAsync());
+                            Application.Current.Dispatcher.InvokeAsync(RunQuickSpeedTestAsync);
                             return true;
                         }
                     });
@@ -321,7 +315,7 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                     _context.API.ShowMsg("Speed Test", "🚀 Quick test started...", _iconPath);
                 }
 
-                var result = await ExecuteSpeedTestCLI(showUI: false);
+                var result = await ExecuteSpeedTestCLI();
 
                 if (result != null)
                 {
@@ -356,142 +350,78 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             }
         }
 
-        private async Task RunSpeedTestAsync()
+        private void OpenSpeedTestPanel()
         {
-            if (!File.Exists(_cliPath) && !IsSpeedtestInPath())
-            {
-                _context.API.ShowMsg("Speed Test Error", "❌ Speedtest CLI not found. Please install Speedtest CLI or place speedtest.exe in the plugin directory.", _iconPath);
-                return;
-            }
-
             if (_isRunningTest) return;
+            if (_panel == null)
+            {
+                _panel = new SpeedTestPanel(
+                    () => _ = RunSpeedTestAsync(_panel),
+                    () =>
+                    {
+                        _panel = null;
+                        CancelSpeedTest(showNotifications: false);
+                    });
+                _panel.Show();
+            }
+            else
+            {
+                _panel.Activate();
+            }
+            _ = RunSpeedTestAsync(_panel);
+        }
+
+        private async Task RunSpeedTestAsync(SpeedTestPanel panel)
+        {
+            if (_isRunningTest || panel == null) return;
 
             _isRunningTest = true;
             _testStartTime = DateTime.Now;
-            _cancellationTokenSource = new CancellationTokenSource();
-            var token = _cancellationTokenSource.Token;
-
-            Application.Current.Dispatcher.Invoke(() => _context.API.ChangeQuery("spt running..."));
-
-            LoadingWindow loadingWindow = null;
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                loadingWindow = new LoadingWindow(_cancellationTokenSource);
-                _currentLoadingWindow = loadingWindow;
-                loadingWindow.Show();
-                loadingWindow.UpdateStage(LoadingWindow.TestStage.Connecting);
-                loadingWindow.UpdateDetail("Initializing speed test...");
-                loadingWindow.UpdateCLIOutput("🚀 Starting Speedtest CLI...\n");
-            });
+            using var cancellation = new CancellationTokenSource();
+            _cancellationTokenSource = cancellation;
+            panel.BeginRun();
 
             try
             {
-                var result = await ExecuteSpeedTestCLI(showUI: true, loadingWindow, token);
-
-                if (token.IsCancellationRequested)
+                if (!File.Exists(_cliPath) && !IsSpeedtestInPath())
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        if (loadingWindow?.IsVisible == true)
-                        {
-                            loadingWindow.CloseWithAnimation();
-                        }
-                    });
-                    if (_showNotifications)
-                    {
-                        _context.API.ShowMsg("Speed Test", "🛑 Test was canceled", _iconPath);
-                    }
-                    return;
+                    throw new FileNotFoundException("Ookla Speedtest CLI not found.");
                 }
-
-                if (result != null)
+                var result = await ExecuteSpeedTestCLI(panel, cancellation.Token);
+                cancellation.Token.ThrowIfCancellationRequested();
+                if (_saveHistory)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        if (loadingWindow?.IsVisible == true)
-                        {
-                            loadingWindow.CloseWithAnimation();
-                        }
-
-                        try
-                        {
-                            if (_copyToClipboard)
-                            {
-                                Clipboard.SetText(result.ToString());
-                            }
-
-                            if (_saveHistory)
-                            {
-                                SaveTestResult(result);
-                            }
-
-                            var resultsWindow = new ResultsWindow(result);
-                            resultsWindow.ShowDialog();
-                        }
-                        catch (Exception ex)
-                        {
-                            _context.API.ShowMsg("UI Error", $"❌ Error displaying results: {ex.Message}", _iconPath);
-                            Debug.WriteLine($"ResultsWindow display error: {ex}");
-                        }
-                    });
+                    SaveTestResult(result);
+                }
+                panel.Finish(result);
+                if (_copyToClipboard)
+                {
+                    Clipboard.SetText(result.ToString());
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    if (loadingWindow?.IsVisible == true)
-                    {
-                        loadingWindow.CloseWithAnimation();
-                    }
-                });
-                if (_showNotifications)
-                {
-                    _context.API.ShowMsg("Speed Test", "🛑 Test was canceled", _iconPath);
-                }
+                if (ReferenceEquals(_panel, panel)) panel.Finish(null, "Test canceled");
             }
             catch (Exception ex)
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    loadingWindow?.ShowError(ex.Message);
-
-                    var timer = new System.Windows.Threading.DispatcherTimer
-                    {
-                        Interval = TimeSpan.FromSeconds(3)
-                    };
-                        timer.Tick += (s, e) =>
-                        {
-                            timer.Stop();
-                            if (loadingWindow?.IsVisible == true)
-                            {
-                                loadingWindow.CloseWithAnimation();
-                            }
-                        };
-                    timer.Start();
-                });
-
+                if (ReferenceEquals(_panel, panel)) panel.Finish(null, ex.Message);
                 if (_showNotifications)
                 {
-                    _context.API.ShowMsg("Speed Test Error", $"❌ {ex.Message}", _iconPath);
+                    _context.API.ShowMsg("Speed Test Error", ex.Message, _iconPath);
                 }
             }
             finally
             {
-                _isRunningTest = false;
-                _currentLoadingWindow = null;
-                ResetCurrentValues();
-                _cancellationTokenSource?.Dispose();
                 _cancellationTokenSource = null;
-                Application.Current.Dispatcher.Invoke(() => _context.API.ChangeQuery("spt "));
+                _isRunningTest = false;
+                ResetCurrentValues();
             }
         }
 
-        private async Task<SpeedTestResult> ExecuteSpeedTestCLI(bool showUI = true, LoadingWindow loadingWindow = null, CancellationToken token = default)
+        private async Task<SpeedTestResult> ExecuteSpeedTestCLI(SpeedTestPanel panel = null, CancellationToken token = default)
         {
-            var cliJsonOutput = new StringBuilder();
             var cliStdErrAggregator = new StringBuilder();
-            var cliAllOutput = new StringBuilder();
             var cliRawOutput = new StringBuilder(); // For parsing final results
 
             string speedtestExe = File.Exists(_cliPath) ? _cliPath : "speedtest";
@@ -517,7 +447,9 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             };
 
             using var process = new Process { StartInfo = psi };
-            using var _ = token.Register(() =>
+            token.ThrowIfCancellationRequested();
+            process.Start();
+            using var registration = token.Register(() =>
             {
                 try
                 {
@@ -531,165 +463,51 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
                 }
             });
 
-            process.OutputDataReceived += (sender, e) =>
+            void ReportProgress(string line)
             {
-                if (e.Data != null)
+                if (panel == null)
                 {
-                    cliRawOutput.AppendLine(e.Data);
-                    
-                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
-                    cliAllOutput.AppendLine($"[{timestamp}] {e.Data}");
-                    
-                    if (showUI)
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
-                            ParseAndUpdateProgress(e.Data, loadingWindow, cliAllOutput);
-                        });
-                    }
-                    else
-                    {
-                        ParseProgressValues(e.Data);
-                    }
+                    ParseProgressValues(line);
+                    return;
                 }
-            };
-
-            process.ErrorDataReceived += (sender, e) =>
-            {
-                if (e.Data != null)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    string line = e.Data;
-                    cliStdErrAggregator.AppendLine(line);
-                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
-                    cliAllOutput.AppendLine($"[{timestamp}] {line}");
-
-                    if (showUI)
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
-                            ParseAndUpdateProgress(line, loadingWindow, cliAllOutput);
-                        });
-                    }
-                    else
+                    if (!token.IsCancellationRequested)
                     {
                         ParseProgressValues(line);
+                        var status = line.Contains("upload", StringComparison.OrdinalIgnoreCase) || _currentUploadSpeed > 0
+                            ? "Measuring upload…"
+                            : line.Contains("download", StringComparison.OrdinalIgnoreCase) || _currentDownloadSpeed > 0
+                                ? "Measuring download…"
+                                : "Connecting…";
+                        panel.UpdateProgress(_currentDownloadSpeed > 0 ? _currentDownloadSpeed : null,
+                            _currentUploadSpeed > 0 ? _currentUploadSpeed : null, status, _currentServerName);
                     }
-                }
+                });
+            }
+
+            process.OutputDataReceived += (_, e) =>
+            {
+                if (e.Data == null) return;
+                cliRawOutput.AppendLine(e.Data);
+                ReportProgress(e.Data);
+            };
+            process.ErrorDataReceived += (_, e) =>
+            {
+                if (e.Data == null) return;
+                cliStdErrAggregator.AppendLine(e.Data);
+                if (panel != null) ReportProgress(e.Data);
             };
 
-            if (showUI)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
-                    cliAllOutput.AppendLine($"[{timestamp}] 🔧 Executing: speedtest {arguments}");
-                    cliAllOutput.AppendLine($"[{timestamp}] ⏳ Initializing speed test...");
-                    loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
-                });
-            }
-
-            process.Start();
-            
-            if (showUI)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
-                    cliAllOutput.AppendLine($"[{timestamp}] ⚙️ Process started, waiting for response...");
-                    loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
-                });
-            }
-            
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
-
             await process.WaitForExitAsync(token);
-
-            if (token.IsCancellationRequested)
+            token.ThrowIfCancellationRequested();
+            if (process.ExitCode != 0)
             {
-                return null;
+                throw new InvalidOperationException($"Ookla Speedtest CLI exited with code {process.ExitCode}.");
             }
-
-            if (showUI)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    var timestamp = DateTime.Now.ToString("HH:mm:ss");
-                    cliAllOutput.AppendLine($"[{timestamp}] ✅ Speed test completed successfully!");
-                    cliAllOutput.AppendLine($"[{timestamp}] 📋 Processing results...");
-                    loadingWindow?.UpdateCLIOutput(cliAllOutput.ToString());
-                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Complete);
-                    loadingWindow?.UpdateDetail("✅ Test finished. Processing results...");
-                });
-            }
-
             return ParseHumanReadableOutput(cliRawOutput.ToString(), cliStdErrAggregator.ToString());
-        }
-
-        private void ParseAndUpdateProgress(string line, LoadingWindow loadingWindow, StringBuilder cliAllOutput)
-        {
-            ParseProgressValues(line);
-
-            // Match various connection/setup phases
-            if (ConnectingRegex.IsMatch(line) || line.Contains("Selecting server", StringComparison.OrdinalIgnoreCase) ||
-                line.Contains("Retrieving speedtest.net", StringComparison.OrdinalIgnoreCase))
-            {
-                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Connecting);
-                loadingWindow?.UpdateDetail("🔗 Connecting to server...");
-                Debug.WriteLine("Stage updated to Connecting");
-
-                var serverMatch = ServerRegex.Match(line);
-                if (serverMatch.Success)
-                {
-                    _currentServerName = serverMatch.Groups["serverName"].Value.Trim();
-                    loadingWindow?.UpdateServerInfo(_currentServerName);
-                    loadingWindow?.UpdateDetail($"🌐 Connected to {_currentServerName}");
-                    Debug.WriteLine($"Server name updated: {_currentServerName}");
-                }
-            }
-            // Match testing phases
-            else if (TestingRegex.IsMatch(line) || TestProgressRegex.IsMatch(line))
-            {
-                if (line.Contains("download", StringComparison.OrdinalIgnoreCase))
-                {
-                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Download);
-                    loadingWindow?.UpdateDetail("📥 Testing download speed...");
-                    Debug.WriteLine("Stage updated to Download");
-                }
-                else if (line.Contains("upload", StringComparison.OrdinalIgnoreCase))
-                {
-                    loadingWindow?.UpdateStage(LoadingWindow.TestStage.Upload);
-                    loadingWindow?.UpdateDetail("📤 Testing upload speed...");
-                    Debug.WriteLine("Stage updated to Upload");
-                }
-            }
-            // Match latency results
-            else if (LatencyRegex.IsMatch(line) || IdleLatencyRegex.IsMatch(line))
-            {
-                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Latency);
-                loadingWindow?.UpdateDetail($"📡 Latency: {_currentLatency:F1} ms");
-                Debug.WriteLine($"Stage updated to Latency: {_currentLatency:F1} ms");
-            }
-            // Match download speed results
-            else if (DownloadRegex.IsMatch(line) && !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
-            {
-                var speedText = $"{_currentDownloadSpeed:F1} Mbps ⬇️";
-                loadingWindow?.UpdateCurrentSpeed(speedText);
-                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Download);
-                loadingWindow?.UpdateDetail($"📥 Download: {_currentDownloadSpeed:F1} Mbps");
-                Debug.WriteLine($"Download speed: {_currentDownloadSpeed:F1} Mbps");
-            }
-            // Match upload speed results
-            else if (UploadRegex.IsMatch(line) && !line.Contains("data used", StringComparison.OrdinalIgnoreCase))
-            {
-                var speedText = $"{_currentUploadSpeed:F1} Mbps ⬆️";
-                loadingWindow?.UpdateCurrentSpeed(speedText);
-                loadingWindow?.UpdateStage(LoadingWindow.TestStage.Upload);
-                loadingWindow?.UpdateDetail($"📤 Upload: {_currentUploadSpeed:F1} Mbps");
-                Debug.WriteLine($"Upload speed: {_currentUploadSpeed:F1} Mbps");
-            }
         }
 
         private void ParseProgressValues(string line)
@@ -978,8 +796,10 @@ namespace Community.PowerToys.Run.Plugin.SpeedTest
             {
                 CancelSpeedTest(showNotifications: false);
 
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = null;
+                if (_panel != null)
+                {
+                    _panel.Dispatcher.Invoke(() => _panel?.Close());
+                }
 
                 if (_context?.API != null)
                 {

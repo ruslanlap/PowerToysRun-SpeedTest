@@ -67,17 +67,17 @@
 ## ✨ Features
 - ⚡ One-command internet speed test from PowerToys Run
 - 📊 Shows download, upload, ping, server info, and shareable result URL
-- 🖼️ Beautiful modern WPF UI with animated loading and real-time progress
-- 🎨 Classic "running dots" loading animation like Speedtest.net
-- 🎨 Theme-aware (dark/light icons, adapts to system theme)
+- 🖼️ Compact dark panel inspired by [Omarchy's network speed test](https://github.com/omacom/omarchy/blob/fee089f1647a4dc57e473c7c8df88478ee260b16/shell/plugins/panels/speedtest/Panel.qml): live download/upload dials, **Run again**, and **Esc** to cancel or close. The test still uses Ookla's CLI.
+- 🎨 Dark/light launcher icons and Windows high-contrast support in the test panel
 - 📋 Optional clipboard integration (configurable in settings)
-- 🎯 Enhanced UI with modern button styling
 - 🛡️ Improved stability and error handling
 - 🔧 Persistent user settings
 - 📝 Copy/share results instantly (optional)
 - 🛠️ Robust error handling and informative messages
 
 ## 🎬 Demo
+The recordings below show earlier versions of the plugin.
+
 <div align="center">
   <img src="SpeedTest/data/demo-speedtest.gif" alt="SpeedTest Plugin Demo" width="800">
   <img src="SpeedTest/data/gif presentation.gif" alt="Presentation GIF" width="800">
